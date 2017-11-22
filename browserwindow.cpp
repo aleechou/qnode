@@ -31,8 +31,8 @@ BrowserWindowCreator * BrowserWindowCreator::singleton() {
 
 BrowserWindow::BrowserWindow(unsigned int parentObjectId, QWidget *parent) :
     QWidget(parent),
-    parentObjectId(parentObjectId),
-    ui(new Ui::BrowserWindow)
+    ui(new Ui::BrowserWindow),
+    parentObjectId(parentObjectId)
 {
     ui->setupUi(this);
     objectId = ScriptObjects::registerScriptObject(this) ;

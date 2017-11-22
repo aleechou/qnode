@@ -85,11 +85,11 @@ else {
 }
 
 
-QMAKE_CXXFLAGS += -Wno-unused-parameter
-QMAKE_CXXFLAGS += -Wno-unused-variable
-QMAKE_CXXFLAGS += -Wno-unused-function
-QMAKE_CXXFLAGS += -Wno-reorder
-QMAKE_CXXFLAGS += -fpermissive
+QMAKE_CXXFLAGS_WARN_ON += -Wall -Wextra
+QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
+QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function
+QMAKE_CXXFLAGS_WARN_ON += -Wno-reorder
+QMAKE_CXXFLAGS_WARN_ON += -fpermissive
 
 RESOURCES += \
     lib.qrc
