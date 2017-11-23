@@ -47,6 +47,10 @@ void NodeThread::run() {
         uv_idle_stop(uvidler);
         delete uvidler;
     }
+    if(uvprepare) {
+        uv_prepare_stop(uvprepare);
+        delete uvprepare;
+    }
 
 }
 
@@ -87,15 +91,19 @@ void NodeThread::beforeloop(v8::Isolate * isolate, void * loop){
     global->Set(v8string("$qnodeapi_console_port"), v8string(qgetenv("QTWEBENGINE_REMOTE_DEBUGGING"))) ;
 
     // process qt event loop
+//    thread->uvprepare = new uv_prepare_t;
+//    uv_prepare_init((uv_loop_t*)loop, thread->uvprepare);
+//    uv_prepare_start(thread->uvprepare, [](uv_prepare_t*){
+//        NodeThread * thread = (NodeThread*)QThread::currentThread() ;
+//        thread->eventDispatcher()->processEvents(QEventLoop::EventLoopExec) ;
+//    }) ;
+
     thread->uvidler = new uv_idle_t;
-
     uv_idle_init((uv_loop_t*)loop, thread->uvidler);
-
     uv_idle_start(thread->uvidler, [](uv_idle_t*){
         NodeThread * thread = (NodeThread*)QThread::currentThread() ;
         thread->eventDispatcher()->processEvents(QEventLoop::EventLoopExec) ;
     }) ;
-
 }
 
 

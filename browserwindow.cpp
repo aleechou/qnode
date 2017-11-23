@@ -75,10 +75,15 @@ BrowserWindow::BrowserWindow(unsigned int parentObjectId, QWidget *parent) :
 
 void BrowserWindow::onLoaded() {
     QWebEnginePage * page = ui->browser->page() ;
-    page->runJavaScript(apiFs.readFile(":/sdk/webkit/eventemitter.js")) ;
-    page->runJavaScript(apiFs.readFile(":/sdk/webkit/window.js")) ;
-    page->runJavaScript(apiFs.readFile(":/sdk/common/api.run.js")) ;
-    page->runJavaScript(apiFs.readFile(":/sdk/common/bridge.js")) ;
+//    page->runJavaScript(apiFs.readFile(":/sdk/webkit/eventemitter.js")) ;
+//    page->runJavaScript(apiFs.readFile(":/sdk/webkit/window.js")) ;
+//    page->runJavaScript(apiFs.readFile(":/sdk/common/api.run.js")) ;
+//    page->runJavaScript(apiFs.readFile(":/sdk/common/bridge.js")) ;
+
+    loadScript("qrc:/sdk/webkit/eventemitter.js") ;
+    loadScript("qrc:/sdk/webkit/window.js") ;
+    loadScript("qrc:/sdk/common/api.run.js") ;
+    loadScript("qrc:/sdk/common/bridge.js") ;
 
     emit this->ready(true) ;
 }

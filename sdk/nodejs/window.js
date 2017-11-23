@@ -65,7 +65,9 @@ qnode.window.eventEmit = function(objId, eventName, argv) {
     if (!objectById[objId]) {
         return
     }
-    objectById[objId].emit(eventName, ...argv)
+    setImmediate(() => {
+        objectById[objId].emit(eventName, ...argv)
+    })
 }
 
 qnode.classes.Window = Window

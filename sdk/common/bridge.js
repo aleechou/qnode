@@ -33,26 +33,27 @@ qnode.bridge.bridgeTo = async function(threadId, object, funcReceiverInWindow) {
 
         shadowObject = qnode.bridge.object(object, from, originId)
 
-        resolve(shadowObject.meta.id)
-        console.log(">>>", shadowObject.meta.id)
+        resolve(shadowObject["@"].id)
 
         funcReceiverInWindow(object)
 
-    }, { originId: object.meta.id, object, funcReceiverInWindow })
+    }, { originId: object["@"].id, object, funcReceiverInWindow })
 
-    console.log("remoteId:", remoteId)
-
-    object.meta.bridgeTo.push([threadId, remoteId])
-
-    console.log(object.meta)
+    object["@"].bridgeTo.push([threadId, remoteId])
 
     return remoteId
 }
 
+var proxyid_signned = 0
+
 
 function proxy(target, meta, path) {
 
-    // var localObject = local_objects_by_id[id]
+    if (target.__isProxy) {
+        throw new Error("can not pass a Proxy object as a proxy target")
+    }
+
+    var proxyid = proxyid_signned++;
 
     for (var name in target) {
         if ("object" == typeof target[name] && target[name].constructor != Array) {
@@ -78,22 +79,15 @@ function proxy(target, meta, path) {
                 return true
             }
 
-            if ("object" == typeof value && value.constructor != Array) {
-                target[prop] = proxy(value, meta, path.concat([name]))
-            } else {
-                target[prop] = value
-            }
-
             // 同步桥接的对象
             for (var remote of meta.bridgeTo) {
                 var threadId = remote[0]
                 var remoteId = remote[1]
 
                 // 变化来源
-                if ($mutation_from == threadId && $mutation_for == remoteId) {
+                if (qnode.bridge.__mutation_from === threadId && qnode.bridge.__mutation_for === remoteId) {
                     continue
                 }
-
                 qnode.api.run(threadId, () => {
                     qnode.bridge.commit(remoteId, path, prop, value, from)
                 }, {
@@ -105,6 +99,14 @@ function proxy(target, meta, path) {
                 })
             }
 
+
+            if ("object" == typeof value && value.constructor != Array) {
+                value = proxy(value, meta, path.concat([prop]))
+            }
+
+            target[prop] = value
+
+
             // 触发事件
             if (changeCallbacks[prop]) {
                 for (var id in changeCallbacks[prop]) {
@@ -115,8 +117,14 @@ function proxy(target, meta, path) {
             return true
         },
         get: function(target, prop) {
-            if (prop == "meta") {
+            if (prop == "@") {
                 return meta
+            } else if (prop == "*") {
+                return target
+            } else if (prop == "#") {
+                return proxyid
+            } else if (prop == '__isProxy') {
+                return true
             } else if (prop == "change") {
                 return onchange
             }
@@ -126,14 +134,21 @@ function proxy(target, meta, path) {
                 return function() {}
             }
 
-            return (meta && meta.hasOwnProperty(prop)) ? meta[prop] : target[prop]
+            return target[prop]
         },
+        deleteProperty: function(target, prop) {
+            delete target[prop]
+            return true
+        },
+        enumerate: function() {
+            return Object.keys(target)
+        }
     })
     return proxyobj
 }
 
-var $mutation_from = undefined
-var $mutation_for = undefined
+qnode.bridge.__mutation_from = undefined
+qnode.bridge.__mutation_for = undefined
 
 qnode.bridge.commit = function(localId, path, prop, value, from) {
     var localObject = local_objects_by_id[localId]
@@ -142,11 +157,13 @@ qnode.bridge.commit = function(localId, path, prop, value, from) {
         return
     }
 
-    $mutation_from = from
-    $mutation_for = localId
+    qnode.bridge.__mutation_from = parseInt(from)
+    qnode.bridge.__mutation_for = parseInt(localId)
 
-    path.reduce((object, name) => object[name], localObject)[prop] = value
+    var object = path.reduce((object, name) => object[name], localObject)
 
-    $mutation_from = undefined
-    $mutation_for = undefined
+    object[prop] = value
+
+    qnode.bridge.__mutation_from = undefined
+    qnode.bridge.__mutation_for = undefined
 }

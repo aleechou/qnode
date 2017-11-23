@@ -42,6 +42,7 @@ private:
     v8::Isolate * isolate = nullptr ;
 
     uv_idle_t * uvidler = nullptr ;
+    uv_prepare_t * uvprepare = nullptr ;
 
     unsigned int invokeAnotherThreadReqId = 0 ;
 
