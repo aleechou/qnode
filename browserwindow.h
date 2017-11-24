@@ -57,15 +57,20 @@ public:
     unsigned int id() {return objectId ;}
 
     Q_INVOKABLE void loadScript(const QString & url) ;
+    Q_INVOKABLE void loadScript(const QString & url, unsigned int data) ;
     Q_INVOKABLE void runScript(const QString & script) ;
     Q_INVOKABLE void load(const QString & url) ;
     Q_INVOKABLE void onLoaded() ;
 
     Q_INVOKABLE void runScriptInThread(unsigned int, const QString &) ;
 
-signals:
-    void ready(bool) ;
+    Q_INVOKABLE void emitScriptLoaded(const QString & url, unsigned int data){
+        emit this->scriptLoaded(QVariant(url), QVariant(data)) ;
+    }
 
+signals:
+    void ready(const QVariant & ok) ;
+    void scriptLoaded(const QVariant & url, const QVariant & data=QVariant()) ;
 
 private:
     Ui::BrowserWindow *ui;

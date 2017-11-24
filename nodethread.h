@@ -57,6 +57,8 @@ public:
         connId(connId), from(from), QObject(from) {}
 public slots:
     void slot() ;
+    void slot(const QVariant &) ;
+    void slot(const QVariant &, const QVariant &) ;
 private:
     unsigned int connId ;
     NodeThread * from ;

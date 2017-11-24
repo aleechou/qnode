@@ -3,7 +3,6 @@ var remote_objects_by_id = {}
 var local_objects_by_id = {}
 var local_objects_signned_id = 0
 
-
 qnode.bridge.object = function(object, bridgeFrom, remoteId) {
 
     var meta = {

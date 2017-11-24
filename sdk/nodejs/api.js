@@ -20,8 +20,7 @@ $qnodeapi_invoke_return = function(reqId, value) {
 var connectionsSignalSlot = {}
 $qnodeapi_emit = function(connId) {
     if (connectionsSignalSlot[connId]) {
-        connectionsSignalSlot[connId]()
-
+        connectionsSignalSlot[connId].apply(this, Array.prototype.slice.call(arguments, 1))
         setTimeout(() => {}, 0);
     }
 }
@@ -69,3 +68,11 @@ qnode.api.wrapper = function(qtClassMeta) {
 qnode.api.runScriptInThread = function(threadObjId, script) {
     return qnode.api.invoke(threadObjId, "runScript(QString)", script)
 }
+
+
+process.on('uncaughtException', function(err) {
+    console.error('Caught exception: ' + err);
+})
+process.on('unhandledRejection', (reason, p) => {
+    console.error('Unhandled Rejection at:', p, 'reason:', reason);
+})

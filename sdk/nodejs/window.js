@@ -5,6 +5,9 @@ class Window extends EventEmitter {
         super()
         this.objId = undefined
         this._on_qt_ready = undefined
+
+        this.__loadscriptid = 0
+        this.__loadscript_callbacks = {}
     }
 
     on(event, callback) {
@@ -25,7 +28,7 @@ class Window extends EventEmitter {
             this._on_qt_ready = (ok) => {
                 this.emit('ready', ok)
             }
-            qnode.api.on(this.objId, "ready(bool)", this._on_qt_ready)
+            qnode.api.on(this.objId, "ready(QVariant)", this._on_qt_ready)
         }
     }
 
@@ -39,14 +42,33 @@ class Window extends EventEmitter {
             }
         }
         this.objId = objId
+
+        qnode.api.on(this.objId, 'scriptLoaded(QVariant,QVariant)', (url, id) => {
+            if (this.__loadscript_callbacks[id]) {
+                this.__loadscript_callbacks[id](url)
+                delete this.__loadscript_callbacks[id]
+            }
+        })
     }
 
-    load(url) {
+    load(url, callback) {
+        // callback 用于处理窗口的 重复 ready 事件,
+        // 例如 刷新, 跳转
+        if (callback) {
+            this.on("ready", () => setImmediate(callback))
+        }
         return new Promise((resolve) => {
             qnode.api.invoke(this.objId, "load(QString)", url)
-            this.once("ready", (ok) => {
-                resolve(ok)
-            })
+            this.once("ready", resolve)
+        })
+    }
+
+    loadScript(url) {
+        var qtfunc = Window.meta.__wrapper__.loadScript
+        var loadscriptid = this.__loadscriptid++;
+        qtfunc.call(this, url, loadscriptid)
+        return new Promise((resolve) => {
+            this.__loadscript_callbacks[loadscriptid] = resolve
         })
     }
 

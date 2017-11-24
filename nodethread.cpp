@@ -2,6 +2,7 @@
 #include <QCoreApplication>
 #include <QAbstractEventDispatcher>
 #include <QJsonDocument>
+#include <QMetaMethod>
 #include "browserwindow.h"
 #include "nodeapi.h"
 #include "common.h"
@@ -51,7 +52,6 @@ void NodeThread::run() {
         uv_prepare_stop(uvprepare);
         delete uvprepare;
     }
-
 }
 
 inline QString variant_qt_to_js(const QVariant & value){
@@ -90,13 +90,6 @@ void NodeThread::beforeloop(v8::Isolate * isolate, void * loop){
     global->Set(v8string("$qnodeapi_sdk"), v8string(thread->sdk.toStdString().c_str())) ;
     global->Set(v8string("$qnodeapi_console_port"), v8string(qgetenv("QTWEBENGINE_REMOTE_DEBUGGING"))) ;
 
-    // process qt event loop
-//    thread->uvprepare = new uv_prepare_t;
-//    uv_prepare_init((uv_loop_t*)loop, thread->uvprepare);
-//    uv_prepare_start(thread->uvprepare, [](uv_prepare_t*){
-//        NodeThread * thread = (NodeThread*)QThread::currentThread() ;
-//        thread->eventDispatcher()->processEvents(QEventLoop::EventLoopExec) ;
-//    }) ;
 
     thread->uvidler = new uv_idle_t;
     uv_idle_init((uv_loop_t*)loop, thread->uvidler);
@@ -235,8 +228,17 @@ void NodeThread::jsOn(const v8::FunctionCallbackInfo<v8::Value> & args){
         return ;
     }
 
+    QMetaMethod metaSignal = metaObj->method(sigindex) ;
+    QString slotSign = "slot(" ;
+    for(int i=0; i<metaSignal.parameterCount(); i++){
+        if(i>0)
+            slotSign+= "," ;
+        slotSign+= "QVariant" ;
+    }
+    slotSign+= ")" ;
+
     DynamicConnectionReceiver * receiver = new DynamicConnectionReceiver(connId, thread) ;
-    QMetaObject::connect(object, sigindex, receiver, receiver->metaObject()->indexOfSlot("slot()")) ;
+    QMetaObject::connect(object, sigindex, receiver, receiver->metaObject()->indexOfSlot(slotSign.toStdString().c_str())) ;
 
     args.GetReturnValue().Set(v8int32(connId)) ;
 }
@@ -244,6 +246,24 @@ void NodeThread::jsOn(const v8::FunctionCallbackInfo<v8::Value> & args){
 void DynamicConnectionReceiver::slot(){
     sender() ;
     QString script = QString("$qnodeapi_emit(%1)").arg(connId) ;
+    v8::Isolate * isolate = from->isolate ;
+    v8::HandleScope scope(from->isolate);
+    v8::Script::Compile ( v8string(script.toStdString().c_str()) )->Run();
+}
+
+void DynamicConnectionReceiver::slot(const QVariant & argv1){
+    sender() ;
+    QString script = QString("$qnodeapi_emit(%1, %2)").arg(connId).arg(variant_qt_to_js(argv1)) ;
+    v8::Isolate * isolate = from->isolate ;
+    v8::HandleScope scope(from->isolate);
+    v8::Script::Compile ( v8string(script.toStdString().c_str()) )->Run();
+}
+
+void DynamicConnectionReceiver::slot(const QVariant & argv1, const QVariant & argv2){
+    QString script = QString("$qnodeapi_emit(%1, %2, %3)")
+            .arg(connId)
+            .arg(variant_qt_to_js(argv1))
+            .arg(variant_qt_to_js(argv2)) ;
     v8::Isolate * isolate = from->isolate ;
     v8::HandleScope scope(from->isolate);
     v8::Script::Compile ( v8string(script.toStdString().c_str()) )->Run();

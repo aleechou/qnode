@@ -45,9 +45,8 @@ BrowserWindow::BrowserWindow(unsigned int parentObjectId, QWidget *parent) :
     ui->browser->page()->setWebChannel(channel);
 
     QObject::connect(ui->browser->page(), &QWebEnginePage::loadFinished,[this](bool ok){
-
         if(!ok) {
-            emit this->ready(ok);
+            emit this->ready(QVariant(ok));
         }
 
         QWebEnginePage * page = ui->browser->page() ;
@@ -75,17 +74,13 @@ BrowserWindow::BrowserWindow(unsigned int parentObjectId, QWidget *parent) :
 
 void BrowserWindow::onLoaded() {
     QWebEnginePage * page = ui->browser->page() ;
-//    page->runJavaScript(apiFs.readFile(":/sdk/webkit/eventemitter.js")) ;
-//    page->runJavaScript(apiFs.readFile(":/sdk/webkit/window.js")) ;
-//    page->runJavaScript(apiFs.readFile(":/sdk/common/api.run.js")) ;
-//    page->runJavaScript(apiFs.readFile(":/sdk/common/bridge.js")) ;
 
     loadScript("qrc:/sdk/webkit/eventemitter.js") ;
     loadScript("qrc:/sdk/webkit/window.js") ;
     loadScript("qrc:/sdk/common/api.run.js") ;
     loadScript("qrc:/sdk/common/bridge.js") ;
 
-    emit this->ready(true) ;
+    emit this->ready(QVariant(true)) ;
 }
 
 void BrowserWindow::runScriptInThread(unsigned int threadId, const QString & script) {
@@ -109,9 +104,20 @@ void BrowserWindow::load(const QString & url) {
 }
 
 void BrowserWindow::loadScript(const QString & url) {
-    ui->browser->page()->runJavaScript(QString("var script = document.createElement('script'); script.src='%1'; document.body.appendChild(script)").arg(url)) ;
+    ui->browser->page()->runJavaScript(QString(
+       "var script = document.createElement('script');"
+       " script.src='%1';"
+       " document.body.appendChild(script)"
+    ).arg(url)) ;
 }
-
+void BrowserWindow::loadScript(const QString & url, unsigned int data) {
+    ui->browser->page()->runJavaScript(QString(
+       "var script = document.createElement('script');"
+       " script.src='%1';"
+       " script.onload=function() { if($window) $window.emitScriptLoaded('%1', %2) } ;"
+       " document.body.appendChild(script)"
+    ).arg(url).arg(data)) ;
+}
 
 void BrowserWindow::runScript(const QString & script) {
     ui->browser->page()->runJavaScript(script) ;
