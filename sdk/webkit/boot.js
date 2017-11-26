@@ -10,7 +10,6 @@ function loadScript(url) {
 async function loadScriptList(lst){
     for(var url of lst) {
         await loadScript(url)
-        console.log("after", url)
     }
 }
 

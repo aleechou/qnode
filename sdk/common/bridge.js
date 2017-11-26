@@ -55,9 +55,7 @@ function proxy(target, meta, path) {
     var proxyid = proxyid_signned++;
 
     for (var name in target) {
-        if ("object" == typeof target[name] && target[name].constructor != Array) {
-            target[name] = proxy(target[name], meta, path.concat([name]))
-        }
+        target[name] = propValue(name, value)
     }
 
     var callbackid_signned = 0
@@ -71,7 +69,7 @@ function proxy(target, meta, path) {
     }
 
     var proxyobj = new Proxy(target, {
-        set: function(target, prop, value) {
+        set: function(_, prop, value) {
 
             // 没有变化
             if (target[prop] === value) {
@@ -79,32 +77,11 @@ function proxy(target, meta, path) {
             }
 
             // 同步桥接的对象
-            for (var remote of meta.bridgeTo) {
-                var threadId = remote[0]
-                var remoteId = remote[1]
+            asyncUpdateToBridges(prop, value)
 
-                // 变化来源
-                if (qnode.bridge.__mutation_from === threadId && qnode.bridge.__mutation_for === remoteId) {
-                    continue
-                }
-                qnode.api.run(threadId, () => {
-                    qnode.bridge.commit(remoteId, path, prop, value, from)
-                }, {
-                    remoteId,
-                    path,
-                    prop,
-                    value,
-                    from: qnode.api.threadId
-                })
-            }
-
-
-            if ("object" == typeof value && value.constructor != Array) {
-                value = proxy(value, meta, path.concat([prop]))
-            }
-
+            // 更新数值
+            value = propValue(prop, value)
             target[prop] = value
-
 
             // 触发事件
             if (changeCallbacks[prop]) {
@@ -143,6 +120,63 @@ function proxy(target, meta, path) {
             return Object.keys(target)
         }
     })
+
+
+    function propValue(prop, value) {
+        if ("object" == typeof value) {
+            if(value.__isProxy===true)
+                return value
+            // 普通对象
+            if(value.constructor != Array)
+                return proxy(value, meta, path.concat([prop]))
+            // 数组
+            else 
+                return proxyArray(value)
+        } else
+            return value
+        
+    }
+
+    function proxyArray(prop, array) {
+        array.push = function() {
+            var newArray = this.concat(argument)
+            
+            asyncUpdateToBridges(prop, value)       // 同步桥接的对象
+            target[prop] = proxyArray(newArray)     // 更新数组
+        }
+        array.splice = function(idx,length,...replace) {
+            var newArray = this.concat(argument)
+
+            
+            asyncUpdateToBridges(prop, value)       // 同步桥接的对象
+            target[prop] = proxyArray(newArray)     // 更新数组
+        }
+        array.__isProxy = true
+        return array
+    }
+
+    function asyncUpdateToBridges(prop, value) {
+        // 同步桥接的对象
+        for (var remote of meta.bridgeTo) {
+            var threadId = remote[0]
+            var remoteId = remote[1]
+
+            // 变化来源
+            if (qnode.bridge.__mutation_from === threadId && qnode.bridge.__mutation_for === remoteId) {
+                continue
+            }
+            qnode.api.run(threadId, () => {
+                qnode.bridge.commit(remoteId, path, prop, value, from)
+            }, {
+                remoteId,
+                path,
+                prop,
+                value,
+                from: qnode.api.threadId
+            })
+        }
+    }
+
     return proxyobj
 }
 
