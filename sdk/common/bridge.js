@@ -55,7 +55,7 @@ function proxy(target, meta, path) {
     var proxyid = proxyid_signned++;
 
     for (var name in target) {
-        target[name] = propValue(name, value)
+        target[name] = propValue(name, target[name])
     }
 
     var callbackid_signned = 0
@@ -131,25 +131,27 @@ function proxy(target, meta, path) {
                 return proxy(value, meta, path.concat([prop]))
             // 数组
             else 
-                return proxyArray(value)
+                return proxyArray(prop, value)
         } else
             return value
         
     }
 
     function proxyArray(prop, array) {
-        array.push = function() {
-            var newArray = this.concat(argument)
-            
-            asyncUpdateToBridges(prop, value)       // 同步桥接的对象
-            target[prop] = proxyArray(newArray)     // 更新数组
+        array.push = function(...args) {
+            var newArray = this.concat(args)
+
+            asyncUpdateToBridges(prop, newArray)            // 同步桥接的对象
+            target[prop] = proxyArray(prop, newArray)       // 更新数组
         }
         array.splice = function(idx,length,...replace) {
-            var newArray = this.concat(argument)
-
-            
-            asyncUpdateToBridges(prop, value)       // 同步桥接的对象
-            target[prop] = proxyArray(newArray)     // 更新数组
+            if(length===undefined)
+                length = 1
+            var newArray = this.slice(0,idx)
+                                .concat(replace)
+                                .concat(this.slice(idx+length))
+            asyncUpdateToBridges(prop, newArray)            // 同步桥接的对象
+            target[prop] = proxyArray(prop, newArray)       // 更新数组
         }
         array.__isProxy = true
         return array

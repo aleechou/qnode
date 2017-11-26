@@ -18,9 +18,9 @@ $qnodeapi_invoke_return = function(reqId, value) {
 }
 
 var connectionsSignalSlot = {}
-$qnodeapi_emit = function(connId) {
+$qnodeapi_emit = function(connId, ...argv) {
     if (connectionsSignalSlot[connId]) {
-        connectionsSignalSlot[connId].apply(this, Array.prototype.slice.call(arguments, 1))
+        connectionsSignalSlot[connId].apply(this, argv)
         setTimeout(() => {}, 0);
     }
 }
@@ -54,11 +54,10 @@ qnode.api.wrapper = function(qtClassMeta) {
     }
     for (var metaMethod of qtClassMeta.methods) {
         wrapper[metaMethod.name] = ((signature) => {
-            return function() {
-                arguments.__proto__ = Array.prototype
-                arguments.unshift(signature)
-                arguments.unshift(this.objId)
-                return qnode.api.invoke.apply(this, arguments)
+            return function(...argv) {
+                argv.unshift(signature)
+                argv.unshift(this.objId)
+                return qnode.api.invoke.apply(this, argv)
             }
         })(metaMethod.signature)
     }
