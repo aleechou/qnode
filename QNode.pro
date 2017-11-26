@@ -84,7 +84,7 @@ else {
     OUTPUT_DIR = "output/debug"
 }
 
-
+# for clang and gcc
 QMAKE_CXXFLAGS_WARN_ON += -Wall -Wextra
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function

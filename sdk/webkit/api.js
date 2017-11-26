@@ -1,5 +1,9 @@
 qnode = {
-    api: {},
+    api: {
+        threadId: $qnodeapi_thread_id,
+        parentThreadId: $qnodeapi_parent_thread_id,
+        consolePort: $qnodeapi_console_port
+    },
     bridge: {},
     classes: {}
 }

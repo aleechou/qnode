@@ -8,5 +8,6 @@
         <file>sdk/webkit/api.js</file>
         <file>sdk/webkit/eventemitter.js</file>
         <file>sdk/webkit/window.js</file>
+        <file>sdk/webkit/boot.js</file>
     </qresource>
 </RCC>

@@ -49,37 +49,22 @@ BrowserWindow::BrowserWindow(unsigned int parentObjectId, QWidget *parent) :
             emit this->ready(QVariant(ok));
         }
 
-        QWebEnginePage * page = ui->browser->page() ;
-
-        page->runJavaScript(apiFs.readFile(":/qtwebchannel/qwebchannel.js")) ;
-        page->runJavaScript(apiFs.readFile(":/sdk/webkit/api.js")) ;
-
-        QString boot = QString(
-                    "qnode.api.threadId = %1;\r\n"
-                    "qnode.api.parentThreadId = %2;\r\n"
+        QString initConsts = QString(
+                    "$qnodeapi_thread_id = %1;\r\n"
+                    "$qnodeapi_parent_thread_id = %2;\r\n"
                     "$qnodeapi_console_port = %3;\r\n"
-                    "new QWebChannel(qt.webChannelTransport, function(channel) { ;\r\n"
-                    "    for (var name in channel.objects)\r\n"
-                    "        window[name] = channel.objects[name] ;\r\n"
-                    "    qnode.window = $window ;\r\n"
-                    "    $window.onLoaded() ;\r\n"
-                    "})\r\n"
                 )
                     .arg(this->objectId)
                     .arg(this->parentObjectId)
                     .arg(QString(qgetenv("QTWEBENGINE_REMOTE_DEBUGGING"))) ;
-        page->runJavaScript(boot);
+        ui->browser->page()->runJavaScript(initConsts);
+
+        // load boot.js
+        ui->browser->page()->runJavaScript(apiFs.readFile(":/sdk/webkit/boot.js")) ;
     }) ;
 }
 
 void BrowserWindow::onLoaded() {
-    QWebEnginePage * page = ui->browser->page() ;
-
-    loadScript("qrc:/sdk/webkit/eventemitter.js") ;
-    loadScript("qrc:/sdk/webkit/window.js") ;
-    loadScript("qrc:/sdk/common/api.run.js") ;
-    loadScript("qrc:/sdk/common/bridge.js") ;
-
     emit this->ready(QVariant(true)) ;
 }
 
