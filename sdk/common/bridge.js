@@ -1,58 +1,72 @@
-var remote_objects_by_id = {}
+/*
+TODO:
+目前还没有处理 local_objects_by_hash_id 内存泄漏的问题，
+当对象不再使用时，仍然被 local_objects_by_hash_id 引用
+*/
 
-var local_objects_by_id = {}
-var local_objects_signned_id = 0
 
-qnode.bridge.object = function(object, bridgeFrom, remoteId) {
+var local_objects_by_hash_id = {}
+var local_objects_hash_seed = 0;
+
+function genHashId() {
+    var feed = (local_objects_hash_seed++)+"-"+Date.now()
+    var md5 = qnode.utils.md5(feed)
+    for(var i=1; i<md5.length; i++) {
+        var id = qnode.api.threadId + ":" + qnode.api.instanceId + ":" + md5.substr(0,i)
+        if( local_objects_by_hash_id[id]===undefined ){
+            return id
+        }
+    }
+    console.error("can not gen hash id for", md5, ", feed",feed)
+
+}
+
+qnode.bridge.object = function(object, bridgeFrom) {
 
     var meta = {
         bridgeFrom: bridgeFrom,
-        remoteId: remoteId,
-        id: local_objects_signned_id++,
         bridgeTo: [],
         isOrigin: bridgeFrom == undefined,
         isShadow: bridgeFrom != undefined,
     }
 
     if (meta.isShadow) {
-        meta.bridgeTo.push([bridgeFrom, remoteId])
+        meta.bridgeTo.push(bridgeFrom)
     }
 
-    var localbject = proxy(object, meta, [])
-    local_objects_by_id[meta.id] = localbject
-
-    return localbject
+    return proxy(object, meta)
 }
 
 qnode.bridge.bridgeTo = async function(threadId, object, funcReceiverInWindow) {
     if (!funcReceiverInWindow)
         funcReceiverInWindow = () => {}
 
-    var remoteId = await qnode.api.run(threadId, () => {
+    await qnode.api.run(threadId, () => {
 
-        shadowObject = qnode.bridge.object(object, from, originId)
+        // console.log("be bridge", JSON.stringify(object))
 
-        resolve(shadowObject["@"].id)
+        shadowObject = qnode.bridge.object(object, from)
 
-        funcReceiverInWindow(object)
+        funcReceiverInWindow(shadowObject)
+        resolve()
 
-    }, { originId: object["@"].id, object, funcReceiverInWindow })
+    }, { object, funcReceiverInWindow })
 
-    object["@"].bridgeTo.push([threadId, remoteId])
-
-    return remoteId
+    object["@"].bridgeTo.push(threadId)
 }
 
-var proxyid_signned = 0
 
-
-function proxy(target, meta, path) {
+function proxy(target, meta) {
 
     if (target.__isProxy) {
         throw new Error("can not pass a Proxy object as a proxy target")
     }
 
-    var proxyid = proxyid_signned++;
+    // 新的 local id
+    if(target["#"]===undefined) {
+        target["#"] = genHashId()
+        local_objects_by_hash_id[target["#"]] = 1 // 先展位
+    }
 
     for (var name in target) {
         target[name] = propValue(name, target[name])
@@ -86,7 +100,7 @@ function proxy(target, meta, path) {
             // 触发事件
             if (changeCallbacks[prop]) {
                 for (var id in changeCallbacks[prop]) {
-                    setImmediate(changeCallbacks[prop][id], value, prop, path, local_objects_by_id[meta.id])
+                    setImmediate(changeCallbacks[prop][id], value, prop, target["#"])
                 }
             }
 
@@ -98,7 +112,7 @@ function proxy(target, meta, path) {
             } else if (prop == "*") {
                 return target
             } else if (prop == "#") {
-                return proxyid
+                return target["#"]
             } else if (prop == '__isProxy') {
                 return true
             } else if (prop == "change") {
@@ -121,6 +135,12 @@ function proxy(target, meta, path) {
         }
     })
 
+    // if(local_objects_by_hash_id[target["#"]] && local_objects_by_hash_id[target["#"]]!==1 && target["#"].substr(0,1)==qnode.api.threadId) {
+    //     console.error("repeat object id", target["#"], target)
+    //     console.error(local_objects_by_hash_id)
+    // }
+    local_objects_by_hash_id[target["#"]] = proxyobj
+
 
     function propValue(prop, value) {
         if ("object" == typeof value) {
@@ -128,10 +148,13 @@ function proxy(target, meta, path) {
                 return value
             // 普通对象
             if(value.constructor != Array)
-                return proxy(value, meta, path.concat([prop]))
+                return proxy(value, meta)
             // 数组
-            else 
+            else {
+                for(var i=0; i<value.length; i++)
+                    value[i] = propValue(i, value[i])
                 return proxyArray(prop, value)
+            }
         } else
             return value
         
@@ -139,6 +162,10 @@ function proxy(target, meta, path) {
 
     function proxyArray(prop, array) {
         array.push = function(...args) {
+
+            for(var i=0; i<args.length; i++)
+                args[i] = propValue(undefined, args[i])
+
             var newArray = this.concat(args)
 
             asyncUpdateToBridges(prop, newArray)            // 同步桥接的对象
@@ -147,6 +174,10 @@ function proxy(target, meta, path) {
         array.splice = function(idx,length,...replace) {
             if(length===undefined)
                 length = 1
+
+            for(var i=0; i<replace.length; i++)
+                replace[i] = propValue(undefined, replace[i])
+
             var newArray = this.slice(0,idx)
                                 .concat(replace)
                                 .concat(this.slice(idx+length))
@@ -159,46 +190,50 @@ function proxy(target, meta, path) {
 
     function asyncUpdateToBridges(prop, value) {
         // 同步桥接的对象
-        for (var remote of meta.bridgeTo) {
-            var threadId = remote[0]
-            var remoteId = remote[1]
+        for (var remoteThreadId of meta.bridgeTo) {
 
             // 变化来源
-            if (qnode.bridge.__mutation_from === threadId && qnode.bridge.__mutation_for === remoteId) {
+            if (__mutation_from === remoteThreadId
+                && __mutation_for === target["#"]) {
                 continue
             }
-            qnode.api.run(threadId, () => {
-                qnode.bridge.commit(remoteId, path, prop, value, from)
-            }, {
-                remoteId,
-                path,
-                prop,
-                value,
-                from: qnode.api.threadId
-            })
+            qnode.api.run(
+                remoteThreadId
+                , () => {
+                    qnode.bridge.commit(objectId, prop, value, from)
+                }
+                , {
+                    objectId: target["#"],
+                    prop,
+                    value,
+                    from: qnode.api.threadId
+                }
+            )
         }
     }
 
     return proxyobj
 }
 
-qnode.bridge.__mutation_from = undefined
-qnode.bridge.__mutation_for = undefined
+__mutation_from = undefined
+__mutation_for = undefined
 
-qnode.bridge.commit = function(localId, path, prop, value, from) {
-    var localObject = local_objects_by_id[localId]
-    if (!localObject) {
-        console.error("unknow local object id for qnode.bridge.commit() ", localId)
-        return
+qnode.bridge.commit = function(objectId, prop, value, from) {
+
+    // console.log("commit()", objectId, prop, value, from)
+
+    var object = local_objects_by_hash_id[objectId]
+
+    if(!object) {
+        console.error("unknow object for qnode.bridge.commit()", arguments)
+        return ;
     }
 
-    qnode.bridge.__mutation_from = parseInt(from)
-    qnode.bridge.__mutation_for = parseInt(localId)
-
-    var object = path.reduce((object, name) => object[name], localObject)
+    __mutation_from = from
+    __mutation_for = objectId
 
     object[prop] = value
 
-    qnode.bridge.__mutation_from = undefined
-    qnode.bridge.__mutation_for = undefined
+    __mutation_from = undefined
+    __mutation_for = undefined
 }

@@ -37,6 +37,8 @@ BrowserWindow::BrowserWindow(unsigned int parentObjectId, QWidget *parent) :
     ui->setupUi(this);
     objectId = ScriptObjects::registerScriptObject(this) ;
 
+    resize(1024,768);
+
     // web channel
     QWebChannel * channel = new QWebChannel(this);
     channel->registerObject("$window", this);
@@ -53,10 +55,12 @@ BrowserWindow::BrowserWindow(unsigned int parentObjectId, QWidget *parent) :
                     "$qnodeapi_thread_id = %1;\r\n"
                     "$qnodeapi_parent_thread_id = %2;\r\n"
                     "$qnodeapi_console_port = %3;\r\n"
+                    "$qnodeapi_instance_id = %4;\r\n"
                 )
                     .arg(this->objectId)
                     .arg(this->parentObjectId)
-                    .arg(QString(qgetenv("QTWEBENGINE_REMOTE_DEBUGGING"))) ;
+                    .arg(QString(qgetenv("QTWEBENGINE_REMOTE_DEBUGGING")))
+                    .arg(webpageInstanceId++) ;
         ui->browser->page()->runJavaScript(initConsts);
 
         // load boot.js

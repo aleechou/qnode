@@ -78,6 +78,8 @@ private:
 
     unsigned int objectId;
     unsigned int parentObjectId ;
+
+    unsigned int webpageInstanceId = 0 ;
 };
 
 

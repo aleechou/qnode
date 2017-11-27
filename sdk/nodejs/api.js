@@ -1,6 +1,7 @@
 qnode = {
     api: {
-        threadId: $qnodeapi_thread
+        threadId: $qnodeapi_thread,
+        instanceId: 0
     },
     bridge: {},
     window: {},
@@ -69,9 +70,6 @@ qnode.api.runScriptInThread = function(threadObjId, script) {
 }
 
 
-process.on('uncaughtException', function(err) {
-    console.error('Caught exception: ' + err);
-})
 process.on('unhandledRejection', (reason, p) => {
     console.error('Unhandled Rejection at:', p, 'reason:', reason);
 })

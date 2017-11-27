@@ -33,6 +33,7 @@ async function loadScriptList(lst){
         await loadScriptList([
             "qrc:/sdk/webkit/eventemitter.js",
             "qrc:/sdk/webkit/window.js",
+            "qrc:/sdk/webkit/md5.js",
             "qrc:/sdk/common/api.run.js",
             "qrc:/sdk/common/bridge.js"
         ])

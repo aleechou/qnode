@@ -9,5 +9,7 @@
         <file>sdk/webkit/eventemitter.js</file>
         <file>sdk/webkit/window.js</file>
         <file>sdk/webkit/boot.js</file>
+        <file>sdk/webkit/md5.js</file>
+        <file>sdk/nodejs/md5.js</file>
     </qresource>
 </RCC>
