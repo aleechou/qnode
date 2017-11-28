@@ -34,7 +34,7 @@ qnode.bridge.object = function(object, bridgeFrom) {
         meta.bridgeTo.push(bridgeFrom)
     }
 
-    return proxy(object, meta)
+    return proxy(object, meta, [])
 }
 
 qnode.bridge.bridgeTo = async function(threadId, object, funcReceiverInWindow) {
@@ -56,7 +56,7 @@ qnode.bridge.bridgeTo = async function(threadId, object, funcReceiverInWindow) {
 }
 
 
-function proxy(target, meta) {
+function proxy(target, meta, path) {
 
     if (target.__isProxy) {
         throw new Error("can not pass a Proxy object as a proxy target")
@@ -100,7 +100,7 @@ function proxy(target, meta) {
             // 触发事件
             if (changeCallbacks[prop]) {
                 for (var id in changeCallbacks[prop]) {
-                    setImmediate(changeCallbacks[prop][id], value, prop, target["#"])
+                    setImmediate(changeCallbacks[prop][id], value, prop, path, target["#"])
                 }
             }
 
@@ -148,11 +148,11 @@ function proxy(target, meta) {
                 return value
             // 普通对象
             if(value.constructor != Array)
-                return proxy(value, meta)
+                return proxy(value, meta, path.concat([prop]))
             // 数组
             else {
                 for(var i=0; i<value.length; i++)
-                    value[i] = propValue(i, value[i])
+                    value[i] = propValue("#index", value[i])
                 return proxyArray(prop, value)
             }
         } else
@@ -164,7 +164,7 @@ function proxy(target, meta) {
         array.push = function(...args) {
 
             for(var i=0; i<args.length; i++)
-                args[i] = propValue(undefined, args[i])
+                args[i] = propValue("#index", args[i])
 
             var newArray = this.concat(args)
 
@@ -176,7 +176,7 @@ function proxy(target, meta) {
                 length = 1
 
             for(var i=0; i<replace.length; i++)
-                replace[i] = propValue(undefined, replace[i])
+                replace[i] = propValue("#index", replace[i])
 
             var newArray = this.slice(0,idx)
                                 .concat(replace)
