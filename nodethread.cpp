@@ -41,8 +41,7 @@ NodeThread::NodeThread(const QStringList & argv, const QString & sdk, QObject *p
 }
 
 void NodeThread::run() {
-
-    node::StartEx(argv.length(), argvArray, NodeThread::beforeloop);
+    node::StartEx(argv.length(), argvArray, NodeThread::onBeforeLoop);
 
     if(uvidler) {
         uv_idle_stop(uvidler);
@@ -70,14 +69,14 @@ void NodeThread::invokeReturn(unsigned int invokeId, const QVariant & value) {
     v8::Script::Compile ( v8string(script.toStdString().c_str()) )->Run();
 }
 
-void NodeThread::beforeloop(v8::Isolate * isolate, void * loop){
+void NodeThread::onBeforeLoop(v8::Isolate * isolate, void * loop){
 
     NodeThread * thread = (NodeThread*)QThread::currentThread() ;
     thread->isolate = isolate ;
 
     v8::Local<v8::Object> global = isolate->GetCurrentContext()->Global();
 
-    // qnode api
+    // qnode apistatic
     DefineMethod("$qnodeapi_invoke", NodeThread, jsInvoke);
     DefineMethod("$qnodeapi_call", NodeThread, jsCall);
     DefineMethod("$qnodeapi_on", NodeThread, jsOn);
@@ -97,6 +96,8 @@ void NodeThread::beforeloop(v8::Isolate * isolate, void * loop){
         NodeThread * thread = (NodeThread*)QThread::currentThread() ;
         thread->eventDispatcher()->processEvents(QEventLoop::EventLoopExec) ;
     }) ;
+
+    emit thread->beforeloop(thread, (void *)isolate, loop);
 }
 
 
@@ -244,7 +245,6 @@ void NodeThread::jsOn(const v8::FunctionCallbackInfo<v8::Value> & args){
 }
 
 void DynamicConnectionReceiver::slot(){
-    sender() ;
     QString script = QString("$qnodeapi_emit(%1)").arg(connId) ;
     v8::Isolate * isolate = from->isolate ;
     v8::HandleScope scope(from->isolate);
@@ -252,7 +252,6 @@ void DynamicConnectionReceiver::slot(){
 }
 
 void DynamicConnectionReceiver::slot(const QVariant & argv1){
-    sender() ;
     QString script = QString("$qnodeapi_emit(%1, %2)").arg(connId).arg(variant_qt_to_js(argv1)) ;
     v8::Isolate * isolate = from->isolate ;
     v8::HandleScope scope(from->isolate);

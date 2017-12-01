@@ -56,6 +56,10 @@ public:
     }
     unsigned int id() {return objectId ;}
 
+    Q_INVOKABLE void resize(int w, int h){
+        return QWidget::resize(w,h);
+    }
+
     Q_INVOKABLE void loadScript(const QString & url) ;
     Q_INVOKABLE void loadScript(const QString & url, unsigned int data) ;
     Q_INVOKABLE void runScript(const QString & script) ;

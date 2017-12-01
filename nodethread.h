@@ -17,7 +17,7 @@ class NodeThread : public QThread
 public:
     explicit NodeThread(const QStringList &, const QString & sdk=QString(),QObject *parent = nullptr);
 
-    static void beforeloop(v8::Isolate *, void *) ;
+    static void onBeforeLoop(v8::Isolate *, void *) ;
 
     static void jsReadInnerModule(const v8::FunctionCallbackInfo<v8::Value> & args) ;
     static void jsInnerModuleExists(const v8::FunctionCallbackInfo<v8::Value> & args) ;
@@ -29,6 +29,10 @@ public:
     Q_INVOKABLE void runScript(const QString & script) ;
 
     friend class DynamicConnectionReceiver ;
+
+signals:
+    void beforeloop(NodeThread * thread, void * v8isolate, void * uvloop) ;
+
 protected:
     void run() ;
 
