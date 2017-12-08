@@ -1,0 +1,35 @@
+{
+    "targets": [{
+        "target_name": "qnode",
+        "sources": [],
+        "build_dir": "output",
+        "include_dirs": [
+            "<!(node -e \"require('nan')\")"
+        ]
+
+        ,
+        "conditions": [
+            ["OS=='linux'", {
+                "cflags": [
+                    "<!@(pkg-config --cflags Qt5Core Qt5Network Qt5Gui Qt5Widgets)", "-Wcomment", "-Wparentheses"
+                ],
+                "ldflags": [
+                    "<!@(pkg-config --libs-only-L --libs-only-other Qt5Core Qt5Network Qt5Gui Qt5Widgets)", "-fexceptions",
+                    "-Wl,-O1 -Wl,-rpath,\\$$ORIGIN:$ORIGIN"
+                ],
+                "libraries": [
+                    "<!@(pkg-config --libs-only-l Qt5Core Qt5Network Qt5Gui Qt5Widgets)", "-fexceptions"
+                ],
+
+                "cflags!": ["-fno-exceptions", "-Wno-comment", "-Wno-parentheses"],
+                "cflags_cc!": ["-fno-exceptions", "-Wno-comment", "-Wno-parentheses"]
+
+            }],
+            ["OS=='win'", {
+                "include_dirs": [],
+                "libraries": []
+            }]
+        ]
+
+    }]
+}
