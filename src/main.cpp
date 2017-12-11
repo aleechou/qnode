@@ -3,6 +3,8 @@
 #include <nan.h>
 #include <node.h>
 #include <QDebug>
+#include <v8.h>
+#include <uv.h>
 
 //int main(int argc, char *argv[])
 //{
@@ -25,7 +27,11 @@ void jsHello(const Nan::FunctionCallbackInfo<v8::Value>& args){
 void Init(v8::Local<v8::Object> exports) {
 
     int argv = 0 ;
-    new QApplication (argv, nullptr) ;
+    QApplication * a = new QApplication (argv, nullptr) ;
+
+    Widget * w = new Widget();
+    w->show();
+
 
     ExportFunction(exports, "hello", jsHello)
 }

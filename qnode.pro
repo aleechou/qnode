@@ -25,10 +25,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH +=  /usr/local/lib/node_modules/nan \
                 $$PWD \
-                $$PWD/deps/node/deps/v8/include \
-                $$PWD/deps/node/deps/v8 \
-                $$PWD/deps/node/deps/uv/include \
-                $$PWD/deps/node/src
+                $$PWD/deps/includes/v8 \
+                $$PWD/deps/includes/uv \
+                $$PWD/deps/includes/node
 
 
 
