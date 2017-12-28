@@ -1,0 +1,4 @@
+qmake .. CONFIG+=debug \
+    && ../tools/make-binding.js \
+    && node-gyp --debug rebuild \
+    && ../tools/pack-qt.js
