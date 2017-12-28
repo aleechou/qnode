@@ -4,12 +4,10 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += core gui widgets network webengine webenginewidgets
 
 TARGET = qnode
-TEMPLATE = app
+TEMPLATE = lib
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked as deprecated (the exact warnings
@@ -25,6 +23,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH +=  /usr/local/lib/node_modules/nan \
                 $$PWD \
+                $$PWD/build \               # for ui_widget.h
                 $$PWD/deps/includes/v8 \
                 $$PWD/deps/includes/uv \
                 $$PWD/deps/includes/node
@@ -54,11 +53,15 @@ QMAKE_CXXFLAGS_WARN_ON += -fpermissive
 
 SOURCES += \
         src/main.cpp \
-        src/widget.cpp
+    src/browserwindow.cpp \
+    src/common.cpp \
+    src/qtobjectwrapper.cpp
 
 HEADERS += \
-        src/widget.h
+    src/browserwindow.h \
+    src/common.h \
+    src/qtobjectwrapper.h
 
 FORMS += \
-        src/widget.ui
+    src/browserwindow.ui
 

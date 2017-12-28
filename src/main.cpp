@@ -1,19 +1,13 @@
-#include "widget.h"
 #include <QApplication>
 #include <nan.h>
 #include <node.h>
 #include <QDebug>
 #include <v8.h>
 #include <uv.h>
+#include <QAbstractEventDispatcher>
+#include "qtobjectwrapper.h"
+#include "browserwindow.h"
 
-//int main(int argc, char *argv[])
-//{
-//    QApplication a(argc, argv);
-//    Widget w;
-//    w.show();
-
-//    return a.exec();
-//}
 
 #define ExportFunction(apiobj, jsname, cppname)                                         \
         apiobj->Set(Nan::New(jsname).ToLocalChecked(),                                  \
@@ -21,19 +15,45 @@
 
 
 void jsHello(const Nan::FunctionCallbackInfo<v8::Value>& args){
-    qDebug() << "hello" ;
+    qDebug() << "hello x" ;
+
+    BrowserWindow * bw = new BrowserWindow ;
+
+    qDebug() << "...." <<  QCoreApplication::arguments()  ;
+
+    bw->show() ;
+
+    qDebug() << "zxzx" ;
 }
+
+
+
 
 void Init(v8::Local<v8::Object> exports) {
 
-    int argv = 0 ;
-    QApplication * a = new QApplication (argv, nullptr) ;
+    int argc = 1 ;
+    char * argv[1] = {"qnode"} ;
+    QApplication * a = new QApplication (argc, argv) ;
 
-    Widget * w = new Widget();
-    w->show();
+    qDebug() <<  QCoreApplication::arguments()  ;
+
+    qRegisterMetaType<BrowserWindow>() ;
+    qRegisterMetaType<BrowserWindow*>();
+
+
+    QtObjectWrapper::Init(exports);
+
+    //
+    uv_idle_t * uvidler = new uv_idle_t;
+    uv_idle_init(uv_default_loop(), uvidler);
+    uv_idle_start(uvidler, [](uv_idle_t*){
+        QCoreApplication::instance()->eventDispatcher()->processEvents(QEventLoop::EventLoopExec) ;
+    }) ;
 
 
     ExportFunction(exports, "hello", jsHello)
 }
+
+
 
 NODE_MODULE(qnode, Init)

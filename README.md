@@ -1,13 +1,18 @@
 ### 编译步骤
 
+0. 进入 build 目录
+```
+cd build
+```
+
 1. 生成 Makefile
 ```
-qmake
+qmake ..
 ```
 
 2. 生成 `binging.gyp` 文件
 ```
-node tools/make-binding.js
+../tools/make-binding.js
 ```
 
 3. 使用 node-gyp 编译成 nodejs 模块
@@ -17,7 +22,7 @@ node-gyp rebuild
 
 4. 拷贝依赖的 qt 动态链接库
 ```
-node tools/pack-qt.js
+../tools/pack-qt.js
 ```
 
 

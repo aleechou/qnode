@@ -17,7 +17,7 @@ proc()
 function proc() {
     // 查看并分析 qnode.node 的依赖项
     var libs = []
-    var output = child_process.execFileSync("ldd", ["-v", __dirname + "/../build/build/Release/qnode.node"]).toString()
+    var output = child_process.execFileSync("ldd", ["-v", __dirname + "/../build/build/Debug/qnode.node"]).toString()
         // console.log(output)
 
     var res = matchAll(/([^\s]+?) (\([^\)]+ \))?=> /g, output)
@@ -37,7 +37,7 @@ function proc() {
 
     // 从 qt 的安装目录拷贝依赖
     try {
-        fs.mkdirSync(__dirname + "/../build/Release/lib")
+        fs.mkdirSync(__dirname + "/../build/Debug/lib")
     } catch (error) {}
     // console.log(ouput)
     for (libfile of libs) {
@@ -46,7 +46,7 @@ function proc() {
             continue
         }
 
-        var targetpath = __dirname + "/../build/build/Release/" + libfile
+        var targetpath = __dirname + "/../build/build/Debug/" + libfile
 
         try {
             fs.copyFileSync(libpath, targetpath)
