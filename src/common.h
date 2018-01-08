@@ -43,7 +43,7 @@ v8::Local<v8::Value> JsonParse(v8::Isolate * isolate, const QByteArray & data);
 
 
 
-#define qd(sth) std::cout << "@" << __LINE__ << " " << sth << std::flush;
+#define qd(sth) std::cout << "@" << __LINE__ << " " << sth << std::endl << std::flush;
 #define qdd qd("");
 
 

@@ -6,6 +6,8 @@
 
 QT       += core gui widgets network webengine webenginewidgets
 
+CONFIG += console
+
 TARGET = qnode
 TEMPLATE = lib
 

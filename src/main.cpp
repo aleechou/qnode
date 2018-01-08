@@ -5,6 +5,8 @@
 #include <v8.h>
 #include <uv.h>
 #include <QAbstractEventDispatcher>
+#include <iostream>
+#include "common.h"
 #include "qtobjectwrapper.h"
 #include "browserwindow.h"
 
@@ -14,42 +16,29 @@
                Nan::New<v8::FunctionTemplate>(cppname)->GetFunction());
 
 
+
 void jsHello(const Nan::FunctionCallbackInfo<v8::Value>& args){
-    qDebug() << "hello x" ;
-
     BrowserWindow * bw = new BrowserWindow ;
-
-    qDebug() << "...." <<  QCoreApplication::arguments()  ;
-
     bw->show() ;
-
-    qDebug() << "zxzx" ;
 }
 
-
-
+int argc = 0 ;
 
 void Init(v8::Local<v8::Object> exports) {
 
-    int argc = 1 ;
-    char * argv[1] = {"qnode"} ;
-    QApplication * a = new QApplication (argc, argv) ;
-
-    qDebug() <<  QCoreApplication::arguments()  ;
+    QApplication * a = new QApplication (argc, NULL) ;
 
     qRegisterMetaType<BrowserWindow>() ;
     qRegisterMetaType<BrowserWindow*>();
 
-
     QtObjectWrapper::Init(exports);
 
-    //
+    // event loop for qt
     uv_idle_t * uvidler = new uv_idle_t;
     uv_idle_init(uv_default_loop(), uvidler);
     uv_idle_start(uvidler, [](uv_idle_t*){
         QCoreApplication::instance()->eventDispatcher()->processEvents(QEventLoop::EventLoopExec) ;
     }) ;
-
 
     ExportFunction(exports, "hello", jsHello)
 }

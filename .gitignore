@@ -2,3 +2,5 @@
 .DS_Store
 build/
 !build/make-all
+node_modules
+deps/node

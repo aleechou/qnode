@@ -8,11 +8,8 @@ Persistent<Function> QtObjectWrapper::constructor;
 
 QtObjectWrapper::QtObjectWrapper(int typeId)
 {
-    qDebug() << typeId ;
-
     metaObject = QMetaType(typeId).metaObject();
 
-    qDebug() << metaObject ;
     qdd
     this->object = metaObject->newInstance();
     qdd
@@ -44,16 +41,18 @@ void QtObjectWrapper::Init(Handle<Object> exports) {
 void QtObjectWrapper::New(const FunctionCallbackInfo<Value>& args) {
     Isolate* isolate = Isolate::GetCurrent();
     HandleScope scope(isolate);
-
+qdd
     // Invoked as constructor: `new QtObjectWrapper(...)`
     if (args.IsConstructCall()) {
         QByteArray className = qtstring(args[0]) ;
-
+qdd
         int typeId = QMetaType::type(className);
         if(QMetaType::UnknownType==typeId) {
             Throw("unknow qt class, you must call qRegisterMetaType first.")
         }
+        qdd
         QtObjectWrapper* obj = new QtObjectWrapper(typeId);
+        qdd
         obj->Wrap(args.This());
         args.GetReturnValue().Set(args.This());
     }
