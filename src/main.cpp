@@ -18,15 +18,19 @@
 
 
 void jsHello(const Nan::FunctionCallbackInfo<v8::Value>& args){
-    BrowserWindow * bw = new BrowserWindow ;
-    bw->show() ;
+
 }
+
+
 
 int argc = 0 ;
 
 void Init(v8::Local<v8::Object> exports) {
 
     QApplication * a = new QApplication (argc, NULL) ;
+
+    qputenv("QTWEBENGINE_REMOTE_DEBUGGING","18011");
+    // qputenv("QTWEBENGINE_REMOTE_DEBUGGING",QString("%1").arg((rand() % 50000)+10000).toStdString().c_str());
 
     qRegisterMetaType<BrowserWindow>() ;
     qRegisterMetaType<BrowserWindow*>();

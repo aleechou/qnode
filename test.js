@@ -5,9 +5,11 @@ console.log(process.argv)
 
 qnode.hello()
 
-console.log("xxxx")
-var bw = new qnode.QtObjectWrapper("BrowserWindow")
-console.log("xxxx")
+var bw = new qnode.QtObjectWrapper("BrowserWindow*")
+    // console.log(bw.methodList())
+bw.invoke('load(QString)', "http://www.163.com")
+bw.invoke('show()')
+
 
 // var window = new addon.QtObjectWrapper("BrowserWindow*");
 // window.invoke("show()");

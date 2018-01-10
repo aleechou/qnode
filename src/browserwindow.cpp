@@ -14,35 +14,38 @@ BrowserWindow::BrowserWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::BrowserWindow)
 {
-    qdd
+    q "BrowserWindow::BrowserWindow" ;
     ui->setupUi(this);
-qdd
-    resize(1024,768);
-qdd
-    // web channel
-    QWebChannel * channel = new QWebChannel(this);
 
-    channel->registerObject("$window", this);
-qdd
-    ui->browser->page()->setWebChannel(channel);
-qdd
-    QObject::connect(ui->browser->page(), &QWebEnginePage::loadFinished,[this](bool ok){
-        if(!ok) {
-            emit this->ready(QVariant(ok));
-        }
+//    resize(1024,768);
 
-        QString initConsts = QString(
-                    "$qnodeapi_console_port = %1;\r\n"
-                )
-                    .arg(QString(qgetenv("QTWEBENGINE_REMOTE_DEBUGGING"))) ;
-        ui->browser->page()->runJavaScript(initConsts);
+//    // web channel
+//    QWebChannel * channel = new QWebChannel(this);
 
-        // load boot.js
-//        ui->browser->page()->runJavaScript(apiFs.readFile(":/sdk/webkit/boot.js")) ;
-    }) ;
+//    channel->registerObject("$window", this);
+
+//    ui->browser->page()->setWebChannel(channel);
+
+//    QObject::connect(ui->browser->page(), &QWebEnginePage::loadFinished,[this](bool ok){
+//        if(!ok) {
+//            emit this->ready(QVariant(ok));
+//        }
+
+//        QString initConsts = QString(
+//                    "$qnodeapi_console_port = %1;\r\n"
+//                )
+//                    .arg(QString(qgetenv("QTWEBENGINE_REMOTE_DEBUGGING"))) ;
+//        ui->browser->page()->runJavaScript(initConsts);
+
+//        // load boot.js
+////        ui->browser->page()->runJavaScript(apiFs.readFile(":/sdk/webkit/boot.js")) ;
+//    }) ;
+
+    ui->browser->load(QUrl("http://www.baidu.com")) ;
 }
 
 void BrowserWindow::load(const QString & url) {
+    q url ;
     ui->browser->load(QUrl(url)) ;
 }
 

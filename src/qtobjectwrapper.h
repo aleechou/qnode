@@ -17,6 +17,7 @@ class QtObjectWrapper : public node::ObjectWrap {
   static v8::Persistent<v8::Function> constructor;
 
   static void invoke(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void methodList(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   const QMetaObject * metaObject = nullptr ;
   QObject * object = nullptr ;
