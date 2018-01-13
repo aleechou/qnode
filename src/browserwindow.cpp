@@ -10,42 +10,50 @@
 #include <QWebEnginePage>
 
 
+QByteArray readFile(const QString & filepath) {
+    QFile file(filepath) ;
+    if(!file.open(QFile::ReadOnly)){
+        qDebug() << "file not exits," << filepath ;
+        return QByteArray() ;
+    }
+    QByteArray content = file.readAll() ;
+    file.close() ;
+    return content ;
+}
+
 BrowserWindow::BrowserWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::BrowserWindow)
 {
-    q "BrowserWindow::BrowserWindow" ;
     ui->setupUi(this);
 
-//    resize(1024,768);
+    resize(1024,768);
 
-//    // web channel
-//    QWebChannel * channel = new QWebChannel(this);
+    // web channel
+    QWebChannel * channel = new QWebChannel(this);
+    channel->registerObject("$window", this);
+    ui->browser->page()->setWebChannel(channel);
 
-//    channel->registerObject("$window", this);
+    QObject::connect(ui->browser->page(), &QWebEnginePage::loadFinished,[this](bool ok){
 
-//    ui->browser->page()->setWebChannel(channel);
+        QWebEnginePage * page = ui->browser->page() ;
 
-//    QObject::connect(ui->browser->page(), &QWebEnginePage::loadFinished,[this](bool ok){
-//        if(!ok) {
-//            emit this->ready(QVariant(ok));
-//        }
+        page->runJavaScript(readFile(":/qtwebchannel/qwebchannel.js")) ;
+//        page->runJavaScript(apiFs.readFile(":/sdk/webkit/require.js")) ;
 
-//        QString initConsts = QString(
-//                    "$qnodeapi_console_port = %1;\r\n"
-//                )
-//                    .arg(QString(qgetenv("QTWEBENGINE_REMOTE_DEBUGGING"))) ;
-//        ui->browser->page()->runJavaScript(initConsts);
+        page->runJavaScript(QString("new QWebChannel(qt.webChannelTransport, function(channel) {;"
+        "    for (var name in channel.objects)"
+        "        window[name] = channel.objects[name];"
+        "})")) ;
 
-//        // load boot.js
-////        ui->browser->page()->runJavaScript(apiFs.readFile(":/sdk/webkit/boot.js")) ;
-//    }) ;
+        emit this->ready(ok) ;
+    }) ;
 
-    ui->browser->load(QUrl("http://www.baidu.com")) ;
 }
 
+
+
 void BrowserWindow::load(const QString & url) {
-    q url ;
     ui->browser->load(QUrl(url)) ;
 }
 
@@ -56,11 +64,13 @@ void BrowserWindow::onLoaded() {
 
 BrowserWindow::~BrowserWindow()
 {
-    qDebug() << "BrowserWindow::~BrowserWindow()" ;
     delete ui;
 }
 
 void BrowserWindow::runScript(const QString & script) {
-//    ui->browser->page()->runJavaScript(script) ;
+    ui->browser->page()->runJavaScript(script) ;
 }
 
+void BrowserWindow::runScriptInMainIsolate(const QString & script) {
+    runNodeScript(script);
+}

@@ -4,3 +4,4 @@ build/
 !build/make-all
 node_modules
 deps/node
+.bin

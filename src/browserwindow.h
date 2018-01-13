@@ -30,6 +30,7 @@ public:
     Q_INVOKABLE void onLoaded() ;
 
     Q_INVOKABLE void runScript(const QString & script) ;
+    Q_INVOKABLE void runScriptInMainIsolate(const QString & script) ;
 
 
 signals:

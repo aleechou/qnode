@@ -28,6 +28,7 @@
 #define qtstring(value) *v8::String::Utf8Value(value->ToString())
 
 #define v8string(string) v8::String::NewFromUtf8(isolate,string.toStdString().c_str())
+#define v8str(str) v8::String::NewFromUtf8(isolate,str)
 #define v8int32(number) v8::Int32::New(isolate,number)
 
 
@@ -41,6 +42,12 @@ v8::Local<v8::String> JsonStringify(v8::Isolate * isolate, v8::Local<v8::Value> 
 
 v8::Local<v8::Value> JsonParse(v8::Isolate * isolate, const QByteArray & data);
 
+
+void setMainIsolate(v8::Isolate *) ;
+
+v8::Isolate * mainIsolate() ;
+
+void runNodeScript(const QString &) ;
 
 
 //#define qd(sth) std::cout << "@" << __LINE__ << " " << sth << std::endl << std::flush;

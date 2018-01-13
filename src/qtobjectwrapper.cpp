@@ -43,7 +43,6 @@ void QtObjectWrapper::New(const FunctionCallbackInfo<Value>& args) {
     // Invoked as constructor: `new QtObjectWrapper(...)`
     if (args.IsConstructCall()) {
         QByteArray className = qtstring(args[0]) ;
-qq
         int typeId = QMetaType::type(className);
         if(QMetaType::UnknownType==typeId) {
             Throw("unknow qt class, you must call qRegisterMetaType first.")
@@ -52,6 +51,7 @@ qq
         QtObjectWrapper* obj = new QtObjectWrapper(typeId);
 
         obj->Wrap(args.This());
+        args.This()->Set(v8str("className"), args[0]) ;
         args.GetReturnValue().Set(args.This());
     }
 
@@ -218,7 +218,8 @@ void QtObjectWrapper::methodList(const FunctionCallbackInfo<Value>& args) {
         output+= "  },\r\n" ;
     }
 
-    output + "]" ;
+    output+= "]" ;
+
 
     Isolate* isolate = Isolate::GetCurrent();
 

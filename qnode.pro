@@ -45,12 +45,6 @@ MOC_DIR = $$OUTPUT_DIR/moc
 RCC_DIR = $$OUTPUT_DIR/rcc
 
 
-# for clang and gcc
-QMAKE_CXXFLAGS_WARN_ON += -Wall -Wextra
-QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
-QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function
-QMAKE_CXXFLAGS_WARN_ON += -Wno-reorder
-QMAKE_CXXFLAGS_WARN_ON += -fpermissive
 
 
 SOURCES += \
@@ -67,3 +61,18 @@ HEADERS += \
 FORMS += \
     src/browserwindow.ui
 
+RESOURCES += \
+    lib.qrc
+
+
+
+QMAKE_RPATHDIR+= $ORIGIN:$ORIGIN/lib
+
+
+# for clang and gcc
+QMAKE_CXXFLAGS_WARN_ON += -Wall -Wextra
+QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-variable
+QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
+QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function
+QMAKE_CXXFLAGS_WARN_ON += -Wno-reorder
+QMAKE_CXXFLAGS_WARN_ON += -fpermissive

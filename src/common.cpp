@@ -23,3 +23,28 @@ v8::Local<v8::Value> JsonParse(v8::Isolate * isolate, const QByteArray & data){
 
 	return JSON_parse->Call(JSON, 1, args);
 }
+
+
+v8::Isolate * globalMainIsolate = nullptr ;
+
+void setMainIsolate(v8::Isolate * isolate) {
+    globalMainIsolate = isolate ;
+}
+
+v8::Isolate * mainIsolate() {
+    return globalMainIsolate ;
+}
+
+void runNodeScript(const QString & script) {
+
+    v8::Isolate * isolate = mainIsolate() ;
+
+    if( !isolate ){
+        qDebug() << "can not call runScript(), isolate is null" ;
+        return ;
+    }
+
+    v8::HandleScope scope(isolate);
+
+    v8::Script::Compile ( v8string(script) )->Run();
+}
