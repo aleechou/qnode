@@ -10,7 +10,6 @@
 class QtObjectWrapper : public node::ObjectWrap {
 public:
     static void Init(v8::Handle<v8::Object> exports);
-    void onSignalReceived(QObject *) ;
 
     static QString methodList(const QMetaObject *);
 
@@ -24,6 +23,7 @@ private:
     static void invoke(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void methodList(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void connectQtSignal(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void disconnectQtSignal(const v8::FunctionCallbackInfo<v8::Value>& args);
 
 
     const QMetaObject * metaObject = nullptr ;
@@ -31,7 +31,7 @@ private:
     v8::Isolate* isolate ;
     int typeId ;
 
-    QMap<QString, QObject*> signalReceivers ;
+    QMap<int, QObject*> signalReceivers ;
 
 };
 

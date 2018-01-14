@@ -3,13 +3,11 @@ const qnode = require("../../")
 
 var qtClasses = [
     'QObject*', 
-    
-    
     'BrowserWindow*',
 ]
 
 
-var validQtTypes = ['QString','bool','int', 'unsigned int']
+var qtNumberTypes = ['int', 'unsigned int']
 
 
 function parseClassInfo(typeName) {
@@ -22,6 +20,8 @@ function parseClassInfo(typeName) {
 
 
     var cppcode = `
+
+    /* start of class ${className} */
     case ${typeid}:
         switch(sigindex){
 `
@@ -31,38 +31,55 @@ function parseClassInfo(typeName) {
 
         // console.log(meta.params)
         var cppParamList = []
-        var params = []
+        var paramConv = []
         meta.params.forEach((paramMeta, i)=>{
 
             var paramName = 'arg'+(i+1)
-        var paramTitle = paramMeta.type.match(/\*/)? paramMeta.type: `const ${paramMeta.type} & ${paramName}`
+            var paramTitle = paramMeta.type.match(/\*/)? paramMeta.type: `const ${paramMeta.type} & ${paramName}`
 
             cppParamList.push(paramTitle)
 
-            if(validQtTypes.includes(paramMeta.type)) {
-                params.push(paramName)
+            if(paramMeta.type=='QString') {
+                paramConv.push(`                argv[${i+1}] = Local<Value>::New(isolate, v8string(${paramName})) ;`)
+            }
+            else if(paramMeta.type=='bool') {
+                paramConv.push(`                argv[${i+1}] = Local<Value>::New(isolate, v8::Boolean::New(isolate, ${paramName})) ;`)
+            }
+            else if(qtNumberTypes.includes(paramMeta.type)) {
+                paramConv.push(`                argv[${i+1}] = Local<Value>::New(isolate, v8int32(${paramName})) ;`)
+            }
+            else {
+                paramConv.push(`                argv[${i+1}] = Local<Value>::New(isolate, v8str("unknow qt type (${paramMeta.type})")) ;`)
             }
         })
-        console.log(meta.signature, params)
+        console.log(meta.signature)
         // console.log(meta.idx, className, meta.signature)
+        // Local<Value>::New(isolate, v8string(signalSignature))
 
-        var funccode = `[](${cppParamList.join(', ')}){
-            qDebug() << "${meta.signature} <<<<<<<" ${params.length? (' << '+params.join(' << ')): ''} ;
-        }`
+        var funccode = `[wrapper,isolate](${cppParamList.join(', ')}){
+                GET_NODEJS_LISTNER ;
+
+                const unsigned argc = ${meta.params.length+1};
+                Local<Value> argv[argc] = { Local<Value>::New(isolate, v8str("${meta.signature}")) };
+${paramConv.join("\\\r\n")}
+                method->Call(wrapper->handle(), argc, argv);
+            }`
 
         cppcode+= `
         case ${meta.idx}:
-            QObject::connect((${className}*)wrapper->object, &${className}::${meta.name}, ${funccode}) ;
+            QObject::connect((${className}*)wrapper->object, &${className}::${meta.name}, postman, ${funccode}) ;
             break;
 `
     })
 
     cppcode+= `
-    default:
-        Throw("unknow sigindex")
-        return ;
-    }
-    break;
+        default:
+            Throw("unknow sigindex")
+            return ;
+        }
+
+        /* end of class ${className} */
+        break;
 `
 
     return cppcode
@@ -94,9 +111,23 @@ function makeCpp() {
     var cppcode = parseAllClasses(qtClasses)
 
     return `
+#define GET_NODEJS_LISTNER \\
+    \\
+    HandleScope scope(isolate);\\
+    \\
+    Local<Value> member = wrapper->persistent().Get(isolate)->Get(v8str("onQtSignalReceived")) ; \\
+    if( !member->IsFunction() ) { \\
+        qDebug() << "onQtSignalReceived is " << qtstring(member->TypeOf(isolate)) ; \\
+        return ; \\
+    } \\
+    \\
+    Local<Function> method = Local<Function>::Cast(member); 
+
+    
+
 #define ConnectSignalAndSlot \\    
 ` + cppcode.split('\n').reduce((arr, line)=>{
-        arr.push("\t" + line + "    \\")
+        arr.push(line + "    \\")
         return arr
     }, []).join("\r\n") + "\r\n"
 }

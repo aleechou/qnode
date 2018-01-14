@@ -29,6 +29,16 @@ class Window extends qnode.QtObjectWrapper {
         super("BrowserWindow*")
     }
 
+    aload(url) {
+        this.load(url)
+        var self= this
+        return new Promise((resolve, reject)=>{
+            this.once('ready',function (doneUrl, ok){
+                ok? resolve(doneUrl): reject()
+            })
+        })
+    }
+
     run(func, passedArgvs) {
         [vars, values] = stringifyArguments(passedArgvs)
 
@@ -76,7 +86,6 @@ global.qnode_Window_on_run_resolve = function(invokeId, val) {
         Window.run_callbacks[invokeId]( val )
         delete Window.run_callbacks[invokeId]
     }
-    // setImmediate(() => {})
 }
 
 qnode.Window = Window
