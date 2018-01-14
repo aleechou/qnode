@@ -34,7 +34,7 @@ public:
 
 
 signals:
-    void ready(const QVariant & ok) ;
+    void ready(QString, bool) ;
 
 private:
     Ui::BrowserWindow *ui;

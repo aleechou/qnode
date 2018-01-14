@@ -54,48 +54,6 @@ void messageOutputFilter(QtMsgType type, const QMessageLogContext &context, cons
 
 
 
-void jsReflect(const Nan::FunctionCallbackInfo<v8::Value>& args){
-    v8::Isolate * isolate = args.GetIsolate() ;
-
-    int typeId = QMetaType::type(qtstring(args[0]));
-    if(QMetaType::UnknownType==typeId) {
-        Throw("unknow qt class, you must call qRegisterMetaType first.")
-        return ;
-    }
-    qDebug() << typeId ;
-    const QMetaObject * metaObject = QMetaType(typeId).metaObject();
-
-    qDebug() << metaObject ;
-
-    QString output = "[\r\n" ;
-
-    for(int i = 0; i < metaObject->methodCount(); ++i) {
-        QMetaMethod metaMethod = metaObject->method(i) ;
-        output+= "  {\r\n" ;
-        output+= "    name:\"" + QString(metaMethod.name()) + "\",\r\n" ;
-        output+= "    returnType:\"" + QString(metaMethod.typeName()) + "\",\r\n" ;
-
-        output+= "    params:[\r\n" ;
-        QList<QByteArray> parameterNames = metaMethod.parameterNames() ;
-        QList<QByteArray> parameterTypes = metaMethod.parameterTypes() ;
-        for(int p=0;p<metaMethod.parameterCount();p++){
-            output+= "      {\r\n" ;
-            output+= "        name: \"" +QString(parameterNames[p])+ "\",\r\n" ;
-            output+= "        type: \"" +QString(parameterTypes[p])+ "\",\r\n" ;
-            output+= "      },\r\n" ;
-
-        }
-        output+= "    ],\r\n" ;
-
-        output+= "    signature:\"" + QString(metaMethod.methodSignature()) + "\",\r\n" ;
-        output+= "  },\r\n" ;
-    }
-
-    output + "]" ;
-
-    args.GetReturnValue().Set(v8string(output));
-}
-
 void jsReadQrc(const Nan::FunctionCallbackInfo<v8::Value>& args){
 
     v8::Isolate * isolate = args.GetIsolate() ;
@@ -116,6 +74,26 @@ void jsReadQrc(const Nan::FunctionCallbackInfo<v8::Value>& args){
     args.GetReturnValue().Set(v8str(content.data())) ;
 }
 
+
+void jsQtClassMeta(const Nan::FunctionCallbackInfo<v8::Value>& args){
+
+    QByteArray className = qtstring(args[0]) ;
+    int typeId = QMetaType::type(className);
+    if(QMetaType::UnknownType==typeId) {
+        Throw("unknow qt class, you must call qRegisterMetaType first.")
+    }
+
+    v8::Isolate * isolate = args.GetIsolate() ;
+    const QMetaObject * metaObject = QMetaType(typeId).metaObject();
+    args.GetReturnValue().Set(v8string(QtObjectWrapper::methodList(metaObject)));
+}
+
+void jsQtTypeId(const Nan::FunctionCallbackInfo<v8::Value>& args){
+    v8::Isolate * isolate = args.GetIsolate() ;
+    QByteArray className = qtstring(args[0]) ;
+    int typeId = QMetaType::type(className);
+    args.GetReturnValue().Set(v8int32(typeId));
+}
 
 int argc = 0 ;
 
@@ -147,8 +125,9 @@ void Init(v8::Local<v8::Object> exports) {
         QCoreApplication::instance()->eventDispatcher()->processEvents(QEventLoop::EventLoopExec) ;
     }) ;
 
-    ExportFunction(exports, "reflect", jsReflect)
     ExportFunction(exports, "readQrc", jsReadQrc)
+    ExportFunction(exports, "qtClassMeta", jsQtClassMeta)
+    ExportFunction(exports, "qtTypeId", jsQtTypeId)
 }
 
 

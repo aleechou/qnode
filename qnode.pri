@@ -50,12 +50,15 @@ SOURCES += \
         src/main.cpp \
     src/browserwindow.cpp \
     src/common.cpp \
-    src/qtobjectwrapper.cpp
+    src/qtobjectwrapper.cpp \
+    src/dynamicconnectionreceiver.cpp \
+    src/qtsignalrouter.cc
 
 HEADERS += \
     src/browserwindow.h \
     src/common.h \
-    src/qtobjectwrapper.h
+    src/qtobjectwrapper.h \
+    src/dynamicconnectionreceiver.h
 
 FORMS += \
     src/browserwindow.ui

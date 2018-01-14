@@ -2,6 +2,7 @@
 .DS_Store
 build/
 !build/make-all
+!build/tools/*
 node_modules
 deps/node
 .bin

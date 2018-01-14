@@ -2,26 +2,36 @@
 #define QTOBJECTWRAPPER_H
 
 #include <QObject>
+#include <QMap>
 #include <node.h>
 #include <node_object_wrap.h>
 
+
 class QtObjectWrapper : public node::ObjectWrap {
- public:
-  static void Init(v8::Handle<v8::Object> exports);
+public:
+    static void Init(v8::Handle<v8::Object> exports);
+    void onSignalReceived(QObject *) ;
 
- private:
-  explicit QtObjectWrapper(int className);
-  ~QtObjectWrapper();
+    static QString methodList(const QMetaObject *);
 
-  static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static v8::Persistent<v8::Function> constructor;
+private:
+    explicit QtObjectWrapper(int className, v8::Isolate* isolate);
+    ~QtObjectWrapper();
 
-  static void invoke(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void methodList(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static v8::Persistent<v8::Function> constructor;
 
-  const QMetaObject * metaObject = nullptr ;
-  QObject * object = nullptr ;
+    static void invoke(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void methodList(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void connectQtSignal(const v8::FunctionCallbackInfo<v8::Value>& args);
 
+
+    const QMetaObject * metaObject = nullptr ;
+    QObject * object = nullptr ;
+    v8::Isolate* isolate ;
+    int typeId ;
+
+    QMap<QString, QObject*> signalReceivers ;
 
 };
 

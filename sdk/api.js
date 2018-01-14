@@ -45,35 +45,3 @@ const EventEmitter = require('events');
 //     eval("meta.methods = " + qnode.api.call($qnodeapi_script_objects, "methodList(uint)", objId))
 //     return meta
 // }
-
-qnode.QtObjectWrapper.qtClassMetaCache = {}
-
-qnode.QtObjectWrapper.prototype.wrapMethods = function() {
-
-    if(!qnode.QtObjectWrapper.qtClassMetaCache[this.className]) {
-        qnode.QtObjectWrapper.qtClassMetaCache[this.className] = {
-            methods: eval(this.methodList())
-        }
-    }
-
-    var qtClassMeta = qnode.QtObjectWrapper.qtClassMetaCache[this.className]
-
-    // console.log(this.methodList())
-
-    for (var metaMethod of qtClassMeta.methods) {
-        this[metaMethod.name] = ((signature) => {
-            return function() {
-                arguments.__proto__ = Array.prototype
-                arguments.unshift(signature)
-                return this.invoke.apply(this, arguments)
-            }
-        })(metaMethod.signature)
-    }
-}
-
-// console.log(1)
-// var qtClassMeta = qnode.reflect("BrowserWindow")
-// console.log(2)
-// console.log(qtClassMeta)
-
-qnode.QtObjectWrapper.prototype.__proto__ = EventEmitter.prototype

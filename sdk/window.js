@@ -2,55 +2,81 @@
 const EventEmitter = require('events');
 const qnode = require("../.bin/qnode.node")
 
+function stringifyArguments(passedArgvs) {
+    var vars = [], values = []
+    if (passedArgvs) {
+        for (var argvName in passedArgvs) {
+            vars.push(argvName)
+            switch (typeof passedArgvs[argvName]) {
+                case 'function':
+                    values.push(passedArgvs[argvName].toString())
+                    break
+                case 'undefined':
+                    values.push('undefined')
+                    break
+                default:
+                    values.push(JSON.stringify(passedArgvs[argvName]))
+                    break
+            }
+        }
+    }
+    return [vars, values]
+}
+
+
 class Window extends qnode.QtObjectWrapper {
-    constructor(objId) {
+    constructor() {
         super("BrowserWindow*")
-        this.wrapMethods()
     }
 
-    // on(event, callback) {
-    //     if(event=="ready") {
-    //         this._hook_qt_ready()
-    //     }
-    //     return EventEmitter.prototype.on.apply(this, arguments)
-    // }
-    // once(event, callback) {
-    //     if(event=="ready") {
-    //         this._hook_qt_ready()
-    //     }
-    //     return EventEmitter.prototype.once.apply(this, arguments)
-    // }
+    run(func, passedArgvs) {
+        [vars, values] = stringifyArguments(passedArgvs)
 
-    // _hook_qt_ready() {
-    //     if(!this._on_qt_ready) {
-    //         this._on_qt_ready = (ok)=>{
-    //             console.log("readyreadyready")
-    //             this.emit('ready', ok)
-    //         }
-    //         qnode.api.on(this.objId, "ready(bool)", this._on_qt_ready)
-    //     }
-    // }
+        this.runScript(`
+            (function(${vars.join(',')}){
+            try{
+            (${func.toString()})()
+            }catch(e){
+                console.error(e)
+            }
+            })( ${values.join(',')} )
+        `)
+    }
 
-    // _oncreated(objId) {
-    //     if(!Window.meta) {
-    //         Window.meta = qnode.api.reflect(objId)
-    //         Window.meta.__wrapper__ = qnode.api.wrapper(Window.meta)
-    //         for(var name in Window.meta.__wrapper__) {
-    //             Window.prototype[name] = Window.meta.__wrapper__[name]
-    //         }
-    //     }
-    //     this.objId = objId
-    // }
+    arun(func, passedArgvs) {
+        var invoke_id = Window.run_invoke_id++
+        var [vars, values] = stringifyArguments(passedArgvs)
+        
+        var strfunc = `
+    var resolve = function(val){
+        $window.runScriptInMainIsolate("qnode_Window_on_run_resolve(${invoke_id}, " + JSON.stringify(val) + ")")
+    }
+    ;(function(${vars.join(',')}){
+    try{
+    (${func.toString()})()
+    }catch(e){
+        console.error(e)
+    }
+    })( ${values.join(',')} )`
+    
+        this.runScript(strfunc)
+    
+        return new Promise((resolve) => {
+            Window.run_callbacks[invoke_id] = resolve
+        })
+    }
 
-    // load (url) {
-    //     return new Promise((resolve)=>{
-    //         qnode.api.invoke(this.objId, "load(qstring)", url)
-    //         this.once("ready",(ok)=>{
-    //             console.log("okkkkkkkk")
-    //             resolve(ok)
-    //         })
-    //     })
-    // }
+}
+
+Window.run_invoke_id = 0
+Window.run_callbacks = {}
+
+global.qnode_Window_on_run_resolve = function(invokeId, val) {
+    if (Window.run_callbacks[invokeId]) {
+        Window.run_callbacks[invokeId]( val )
+        delete Window.run_callbacks[invokeId]
+    }
+    // setImmediate(() => {})
 }
 
 qnode.Window = Window

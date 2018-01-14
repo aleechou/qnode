@@ -1,15 +1,19 @@
 #include "qtobjectwrapper.h"
 #include "common.h"
 #include <QMetaMethod>
+#include "dynamicconnectionreceiver.h"
+#include "qtsignalrouter.cc"
 
 using namespace v8;
 
 Persistent<Function> QtObjectWrapper::constructor;
 
-QtObjectWrapper::QtObjectWrapper(int typeId)
+QtObjectWrapper::QtObjectWrapper(int typeId, Isolate* isolate)
+    : isolate(isolate)
+    , typeId(typeId)
+    , ObjectWrap()
 {
     metaObject = QMetaType(typeId).metaObject();
-
     this->object = metaObject->newInstance();
 }
 
@@ -30,6 +34,7 @@ void QtObjectWrapper::Init(Handle<Object> exports) {
     // Prototype
     NODE_SET_PROTOTYPE_METHOD(tpl, "invoke", invoke);
     NODE_SET_PROTOTYPE_METHOD(tpl, "methodList", methodList);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "connectQtSignal", connectQtSignal);
 
     constructor.Reset(isolate, tpl->GetFunction());
     exports->Set(String::NewFromUtf8(isolate, "QtObjectWrapper"),
@@ -48,7 +53,7 @@ void QtObjectWrapper::New(const FunctionCallbackInfo<Value>& args) {
             Throw("unknow qt class, you must call qRegisterMetaType first.")
         }
 
-        QtObjectWrapper* obj = new QtObjectWrapper(typeId);
+        QtObjectWrapper* obj = new QtObjectWrapper(typeId, isolate);
 
         obj->Wrap(args.This());
         args.This()->Set(v8str("className"), args[0]) ;
@@ -88,13 +93,14 @@ void QtObjectWrapper::New(const FunctionCallbackInfo<Value>& args) {
 
 void QtObjectWrapper::invoke(const FunctionCallbackInfo<Value>& args) {
 
-    Isolate* isolate = Isolate::GetCurrent();
+    Isolate* isolate = args.GetIsolate();
     HandleScope scope(isolate);
 
     QtObjectWrapper* wrapper = ObjectWrap::Unwrap<QtObjectWrapper>(args.Holder());
 
     if(wrapper->object==nullptr || wrapper->metaObject==nullptr) {
         Throw("wrapper->object==nullptr || wrapper->metaObject==nullptr")
+        return ;
     }
 
     QString methodName = qtstring(args[0]) ;
@@ -194,13 +200,23 @@ void QtObjectWrapper::methodList(const FunctionCallbackInfo<Value>& args) {
     QtObjectWrapper* wrapper = ObjectWrap::Unwrap<QtObjectWrapper>(args.Holder());
     const QMetaObject* metaObject = wrapper->object->metaObject();
 
+    Isolate* isolate = args.GetIsolate();
+
+    args.GetReturnValue().Set(v8string(methodList(metaObject)));
+}
+
+
+QString QtObjectWrapper::methodList(const QMetaObject * metaObject) {
+
     QString output = "[\r\n" ;
 
     for(int i = 0; i < metaObject->methodCount(); ++i) {
         QMetaMethod metaMethod = metaObject->method(i) ;
         output+= "  {\r\n" ;
         output+= "    name:\"" + QString(metaMethod.name()) + "\",\r\n" ;
+        output+= "    type:\"" + QString("%1").arg(metaMethod.methodType()) + "\",\r\n" ;
         output+= "    returnType:\"" + QString(metaMethod.typeName()) + "\",\r\n" ;
+        output+= "    idx:\"" + QString("%1").arg(metaMethod.methodIndex()) + "\",\r\n" ;
 
         output+= "    params:[\r\n" ;
         QList<QByteArray> parameterNames = metaMethod.parameterNames() ;
@@ -220,8 +236,61 @@ void QtObjectWrapper::methodList(const FunctionCallbackInfo<Value>& args) {
 
     output+= "]" ;
 
-
-    Isolate* isolate = Isolate::GetCurrent();
-
-    args.GetReturnValue().Set(v8string(output));
+    return output ;
 }
+
+
+
+#include "browserwindow.h"
+#include <typeinfo>
+//typedef void (BrowserWindow::*ready)(QString, bool);
+
+void QtObjectWrapper::connectQtSignal(const FunctionCallbackInfo<Value>& args) {
+
+    v8::Isolate* isolate = args.GetIsolate();
+    QtObjectWrapper* wrapper = ObjectWrap::Unwrap<QtObjectWrapper>(args.Holder());
+
+    int sigindex = args[0]->ToInt32()->Value() ;
+//    qDebug() << signalSignature.toStdString().c_str() ;
+
+//    if( wrapper->signalReceivers.keys().contains(signalSignature) ){
+//        return ;
+//    }
+
+//    const QMetaObject * metaObj = wrapper->object->metaObject() ;
+//    int sigindex = metaObj->indexOfSignal(signalSignature.toStdString().c_str()) ;
+//    if(sigindex<0) {
+//        Throw(QString("unknow signal %1 of class %2").arg(signalSignature).arg(metaObj->className()).toStdString().c_str())
+//        return ;
+//    }
+
+    DynamicConnectionReceiver * receiver = new DynamicConnectionReceiver(wrapper) ;
+    const QMetaObject * recvMeta = receiver->metaObject() ;
+
+    ConnectSignalAndSlot
+
+
+//    wrapper->signalReceivers.insert(signalSignature, receiver) ;
+}
+
+void QtObjectWrapper::onSignalReceived(QObject * receiver) {
+
+    HandleScope scope(isolate);
+
+    QString signalSignature = signalReceivers.key(receiver) ;
+
+    Local<Value> member = persistent().Get(isolate)->Get(v8str("onQtSignalReceived")) ;
+    if( !member->IsFunction() ) {
+        qDebug() << "onQtSignalReceived is " << qtstring(member->TypeOf(isolate)) ;
+        return ;
+    }
+
+    Local<Function> method = Local<Function>::Cast(member);
+
+    const unsigned argc = 1;
+    Local<Value> argv[argc] = { Local<Value>::New(isolate, v8string(signalSignature)) };
+    method->Call(handle(), argc, argv);
+}
+
+
+

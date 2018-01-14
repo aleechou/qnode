@@ -1,4 +1,4 @@
-require("./api.js")
+require("./nodejs/qtwrapper.js")
 require("./window.js")
 
 //if(process.argv[1])

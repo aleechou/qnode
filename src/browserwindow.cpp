@@ -38,15 +38,19 @@ BrowserWindow::BrowserWindow(QWidget *parent) :
 
         QWebEnginePage * page = ui->browser->page() ;
 
+        if(!ok) {
+            emit this->ready(page->url().toString(), ok) ;
+            return ;
+        }
+
         page->runJavaScript(readFile(":/qtwebchannel/qwebchannel.js")) ;
-//        page->runJavaScript(apiFs.readFile(":/sdk/webkit/require.js")) ;
+        page->runJavaScript(readFile(":/sdk/webkit/require.js")) ;
 
         page->runJavaScript(QString("new QWebChannel(qt.webChannelTransport, function(channel) {;"
         "    for (var name in channel.objects)"
         "        window[name] = channel.objects[name];"
+        "    $window.onLoaded()"
         "})")) ;
-
-        emit this->ready(ok) ;
     }) ;
 
 }
@@ -58,7 +62,7 @@ void BrowserWindow::load(const QString & url) {
 }
 
 void BrowserWindow::onLoaded() {
-    emit this->ready(QVariant(true)) ;
+    emit this->ready(ui->browser->page()->url().toString(), true) ;
 }
 
 
