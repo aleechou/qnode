@@ -104,11 +104,9 @@ void QtObjectWrapper::invoke(const FunctionCallbackInfo<Value>& args) {
         return ;
     }
 
-    QString methodName = qtstring(args[0]) ;
-
-    int index = wrapper->metaObject->indexOfMethod(methodName.toStdString().c_str());
+    int index = args[0]->ToInt32()->Value();
     if(index<0) {
-        qDebug() << "unknow method" << methodName << "for class" << wrapper->metaObject->className() ;
+        qDebug() << "unknow method index" << index << "for class" << wrapper->metaObject->className() ;
         Throw("unknow method")
         return ;
     }
