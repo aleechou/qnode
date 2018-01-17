@@ -61,8 +61,8 @@ HEADERS += \
 FORMS += \
     src/browserwindow.ui
 
-RESOURCES += \
-    lib.qrc
+#RESOURCES += \
+#    lib.qrc
 
 
 

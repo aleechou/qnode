@@ -26,18 +26,28 @@ public:
         return QWidget::resize(w,h);
     }
 
-    Q_INVOKABLE void load(const QString & url) ;
+    Q_INVOKABLE void load(const QString &) ;
     Q_INVOKABLE void onLoaded() ;
+    Q_INVOKABLE void loadScript(const QString &) ;
+    Q_INVOKABLE void loadScript(const QString &, unsigned int) ;
+    Q_INVOKABLE void runScript(const QString &) ;
+    Q_INVOKABLE void runScriptInMainIsolate(const QString &) ;
+    Q_INVOKABLE QByteArray readFile(const QString &) ;
+    Q_INVOKABLE QByteArray envVarValue(const QString &) ;
+    Q_INVOKABLE void setEnvVarValue(const QString &,const QByteArray &) ;
+    Q_INVOKABLE unsigned int nativeWindowId() { return windowId ;}
 
-    Q_INVOKABLE void runScript(const QString & script) ;
-    Q_INVOKABLE void runScriptInMainIsolate(const QString & script) ;
-
+    Q_INVOKABLE void emitScriptLoaded(const QString &, unsigned int) ;
 
 signals:
     void ready(QString, bool) ;
+    void scriptLoaded(const QString & url, unsigned int retData) ;
 
 private:
     Ui::BrowserWindow *ui;
+
+    static unsigned int assignedWindowId ;
+    unsigned int windowId ;
 };
 
 

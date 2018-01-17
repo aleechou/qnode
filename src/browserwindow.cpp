@@ -8,22 +8,15 @@
 #include <QDesktopServices>
 #include <QWebChannel>
 #include <QWebEnginePage>
+#include <QWebEngineSettings>
 
+unsigned int BrowserWindow::assignedWindowId = 0 ;
 
-QByteArray readFile(const QString & filepath) {
-    QFile file(filepath) ;
-    if(!file.open(QFile::ReadOnly)){
-        qDebug() << "file not exits," << filepath ;
-        return QByteArray() ;
-    }
-    QByteArray content = file.readAll() ;
-    file.close() ;
-    return content ;
-}
 
 BrowserWindow::BrowserWindow(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::BrowserWindow)
+    ui(new Ui::BrowserWindow),
+    windowId(assignedWindowId++)
 {
     ui->setupUi(this);
 
@@ -34,6 +27,14 @@ BrowserWindow::BrowserWindow(QWidget *parent) :
     channel->registerObject("$window", this);
     ui->browser->page()->setWebChannel(channel);
 
+    ui->browser->page()->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessFileUrls, true);
+    ui->browser->page()->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
+    ui->browser->page()->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
+
+    ui->browser->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessFileUrls, true);
+    ui->browser->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
+    ui->browser->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
+
     QObject::connect(ui->browser->page(), &QWebEnginePage::loadFinished,[this](bool ok){
 
         QWebEnginePage * page = ui->browser->page() ;
@@ -43,19 +44,49 @@ BrowserWindow::BrowserWindow(QWidget *parent) :
             return ;
         }
 
-        page->runJavaScript(readFile(":/qtwebchannel/qwebchannel.js")) ;
-        page->runJavaScript(readFile(":/sdk/webkit/require.js")) ;
-
-        page->runJavaScript(QString("new QWebChannel(qt.webChannelTransport, function(channel) {;"
-        "    for (var name in channel.objects)"
-        "        window[name] = channel.objects[name];"
-        "    $window.onLoaded()"
-        "})")) ;
+        page->runJavaScript(readFile(envVarValue("QNODE_SDKPATH")+"/browser/boot.js")) ;
     }) ;
+}
 
+void BrowserWindow::loadScript(const QString & url) {
+    ui->browser->page()->runJavaScript(QString(
+       "var script = document.createElement('script');"
+       " script.src='%1';"
+       " document.body.appendChild(script)"
+    ).arg(url)) ;
+}
+void BrowserWindow::loadScript(const QString & url, unsigned int retData) {
+    ui->browser->page()->runJavaScript(QString(
+       "var script = document.createElement('script');"
+       " script.src='%1';"
+       " script.onload=function() { if($window) $window.emitScriptLoaded('%1', %2) } ;"
+       " document.body.appendChild(script)"
+    ).arg(url).arg(retData)) ;
 }
 
 
+void BrowserWindow::emitScriptLoaded(const QString & url, unsigned int retData) {
+    emit this->scriptLoaded(url, retData);
+}
+
+QByteArray BrowserWindow::readFile(const QString & filepath) {
+    QFile file(filepath) ;
+    if(!file.open(QFile::ReadOnly)){
+        qDebug() << "file not exits," << filepath ;
+        return QByteArray() ;
+    }
+    QByteArray content = file.readAll() ;
+    file.close() ;
+    return content ;
+}
+
+
+QByteArray BrowserWindow::envVarValue(const QString & name) {
+    return qgetenv(name.toStdString().c_str()) ;
+}
+void BrowserWindow::setEnvVarValue(const QString & name,const QByteArray & value) {
+    qputenv(name.toStdString().c_str(),value) ;
+}
 
 void BrowserWindow::load(const QString & url) {
     ui->browser->load(QUrl(url)) ;

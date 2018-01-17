@@ -80,7 +80,7 @@ void QtObjectWrapper::New(const FunctionCallbackInfo<Value>& args) {
             invokeArgs.append(QVariant(args[i]->ToBoolean()->Value())) ;    \
         }                                                                   \
         else if( args[i]->IsString() ){                                     \
-            invokeArgs.append(QVariant( qtstring(args[i]) )) ;             \
+            invokeArgs.append(QVariant( qtstring(args[i]) )) ;              \
         }                                                                   \
         else {                                                              \
             qDebug() << "unsuported args type: " << ToQString(args[i]) ;    \
@@ -136,7 +136,7 @@ void QtObjectWrapper::invoke(const FunctionCallbackInfo<Value>& args) {
         );
     }
 
-
+    //
     if( strcmp(metaMethod.typeName(),"void")==0 ) {
 
         // Perform the call
@@ -161,8 +161,6 @@ void QtObjectWrapper::invoke(const FunctionCallbackInfo<Value>& args) {
     }
     else {
 
-        q metaMethod.typeName() ;
-        q QMetaType::type(metaMethod.typeName()) ;
         QVariant returnValue(QMetaType::type(metaMethod.typeName()),
             static_cast<void*>(NULL));
 
@@ -190,6 +188,20 @@ void QtObjectWrapper::invoke(const FunctionCallbackInfo<Value>& args) {
         ) ) {
             qWarning() << "Calling" << metaMethod.methodSignature() << "failed.";
             return ;
+        }
+
+        int type = returnValue.type() ;
+        if( type == QVariant::String ){
+            args.GetReturnValue().Set(v8string(returnValue.toString())) ;
+        }
+        else if( type == QVariant::Bool ){
+            args.GetReturnValue().Set(v8::Boolean::New(isolate, returnValue.toBool())) ;
+        }
+        else if( type >= QVariant::Int && type <= QVariant::ULongLong ){
+            args.GetReturnValue().Set(v8int32(returnValue.toULongLong())) ;
+        }
+        else if( type >= QVariant::Double ){
+            args.GetReturnValue().Set(v8::Number::New(isolate, returnValue.toDouble())) ;
         }
     }
 }

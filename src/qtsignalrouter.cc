@@ -157,6 +157,18 @@ switch (wrapper->typeId) {    \
             }) ;    \
             break;    \
     \
+        case 33:    \
+            QObject::connect((BrowserWindow*)wrapper->object, &BrowserWindow::scriptLoaded, postman, [wrapper,isolate](const QString & arg1, const uint & arg2){    \
+                GET_NODEJS_LISTNER ;    \
+    \
+                const unsigned argc = 3;    \
+                Local<Value> argv[argc] = { Local<Value>::New(isolate, v8str("scriptLoaded(QString,uint)")) };    \
+                argv[1] = Local<Value>::New(isolate, v8string(arg1)) ;\    \
+                argv[2] = Local<Value>::New(isolate, v8int32(arg2)) ;    \
+                method->Call(wrapper->handle(), argc, argv);    \
+            }) ;    \
+            break;    \
+    \
         default:    \
             Throw("unknow sigindex")    \
             return ;    \

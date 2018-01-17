@@ -41,8 +41,8 @@ void messageOutputFilter(QtMsgType type, const QMessageLogContext &context, cons
     }
 
     // 设置输出信息格式
-    QString strMessage = QString("[@%2] %1")
-            .arg(localMsg.constData()).arg(context.line);
+    QString strMessage = QString("[%3@%2] %1")
+            .arg(localMsg.constData()).arg(context.line).arg(context.file);
 
     // 输出信息
     std::cout << strMessage.toStdString().c_str() << std::endl << std::flush ;
@@ -95,19 +95,28 @@ void jsQtTypeId(const Nan::FunctionCallbackInfo<v8::Value>& args){
     args.GetReturnValue().Set(v8int32(typeId));
 }
 
-int argc = 0 ;
+void jsApplicationDirPath(const Nan::FunctionCallbackInfo<v8::Value>& args){
+    v8::Isolate * isolate = args.GetIsolate() ;
+    args.GetReturnValue().Set(v8string(QCoreApplication::applicationDirPath()));
+}
+
+void jsApplicationFilePath(const Nan::FunctionCallbackInfo<v8::Value>& args){
+    v8::Isolate * isolate = args.GetIsolate() ;
+    args.GetReturnValue().Set(v8string(QCoreApplication::applicationFilePath()));
+}
+
+int argc = 2 ;
+char * argv[2] = {"qnode", "--disable-web-security"} ;
 
 void Init(v8::Local<v8::Object> exports) {
 
     qInstallMessageHandler(messageOutputFilter) ;
 
     v8::Isolate * isolate = exports->GetIsolate() ;
-
     setMainIsolate(isolate) ;
 
-//    exports->TypeOf()
 
-    QApplication * a = new QApplication (argc, NULL) ;
+    new QApplication (argc, argv) ;
 
     int console_port = (rand() % 50000)+10000 ;
     qputenv("QTWEBENGINE_REMOTE_DEBUGGING",QString("%1").arg(console_port).toStdString().c_str());
@@ -128,6 +137,8 @@ void Init(v8::Local<v8::Object> exports) {
     ExportFunction(exports, "readQrc", jsReadQrc)
     ExportFunction(exports, "qtClassMeta", jsQtClassMeta)
     ExportFunction(exports, "qtTypeId", jsQtTypeId)
+    ExportFunction(exports, "applicationDirPath", jsApplicationDirPath)
+    ExportFunction(exports, "applicationFilePath", jsApplicationFilePath)
 }
 
 
