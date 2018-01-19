@@ -28,22 +28,20 @@ if (res) {
     var fileBindingGyp = require(__dirname + "/binding.gyp.json")
 
     var files = res[1].split(":")
-    console.log(files)
     files.forEach((file, i) => {
         file = file.trim()
         if (!file)
             return
 
-        fileBindingGyp.targets[0].sources.push("../" + file)
+        fileBindingGyp.targets[0].sources.push(pt.relative(__dirname, __dirname + "/../../" + file))
 
         var mocfilename = "moc_" + pt.parse(file).base
 
-        var mocfile = __dirname + "/../output/Release/moc/" + mocfilename
-        console.log(mocfile)
+        var mocfile = "output/Release/moc/" + mocfilename
         if (fs.existsSync(mocfile)) {
             fileBindingGyp.targets[0].sources.push("output/Release/moc/" + mocfilename)
         }
     })
 
-    fs.writeFileSync(__dirname + "/../binding.gyp", JSON.stringify(fileBindingGyp, null, 4))
+    fs.writeFileSync(process.cwd() + "/binding.gyp", JSON.stringify(fileBindingGyp, null, 4))
 }

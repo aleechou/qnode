@@ -1,9 +1,7 @@
 {
     "targets": [{
         "target_name": "qnode",
-        "sources": [
-            "output/Release/rcc/qrc_lib.cpp"
-        ],
+        "sources": [],
         "build_dir": "output",
         "include_dirs": [
             "<!(node -e \"require('nan')\")",
