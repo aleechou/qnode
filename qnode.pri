@@ -47,16 +47,17 @@ RCC_DIR = $$OUTPUT_DIR/rcc
 
 
 SOURCES += \
-        $$PWD/src/main.cpp \
         $$PWD/src/browserwindow.cpp \
         $$PWD/src/common.cpp \
         $$PWD/src/qtobjectwrapper.cpp \
-        $$PWD/src/qtsignalrouter.cc
+        $$PWD/src/qtsignalrouter.cc \
+        $$PWD/src/init.cpp
 
 HEADERS += \
         $$PWD/src/browserwindow.h \
         $$PWD/src/common.h \
-        $$PWD/src/qtobjectwrapper.h
+        $$PWD/src/qtobjectwrapper.h \
+    $$PWD/src/init.h
 
 FORMS += \
         $$PWD/src/browserwindow.ui

@@ -1,9 +1,6 @@
+#include "init.h"
 #include <QApplication>
-#include <nan.h>
-#include <node.h>
 #include <QDebug>
-#include <v8.h>
-#include <uv.h>
 #include <QAbstractEventDispatcher>
 #include <QFile>
 #include <iostream>
@@ -108,7 +105,7 @@ void jsApplicationFilePath(const Nan::FunctionCallbackInfo<v8::Value>& args){
 int argc = 2 ;
 char * argv[2] = {"qnode", "--disable-web-security"} ;
 
-void Init(v8::Local<v8::Object> exports) {
+void QNodeInit(v8::Local<v8::Object> exports) {
 
     qInstallMessageHandler(messageOutputFilter) ;
 
@@ -143,4 +140,3 @@ void Init(v8::Local<v8::Object> exports) {
 
 
 
-NODE_MODULE(qnode, Init)

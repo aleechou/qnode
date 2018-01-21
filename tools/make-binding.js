@@ -48,7 +48,7 @@ function parseSourceCpp(qtpro, sources) {
 
     var qtdir = pt.dirname(qtpro)
 
-    var proFileContent = fs.readFileSync(__dirname + "/../qnode.pri").toString()
+    var proFileContent = fs.readFileSync(qtpro).toString()
 
     proFileContent = proFileContent
         .replace(/\\\r\n/g, ":")
@@ -58,7 +58,6 @@ function parseSourceCpp(qtpro, sources) {
     if (res) {
 
         var files = res[1].split(":")
-        // console.log(files)
         files.forEach((file, i) => {
             file = file.trim()
             if (!file)
@@ -70,8 +69,8 @@ function parseSourceCpp(qtpro, sources) {
             if(!sources.includes(srccpp))
                 sources.push(srccpp)
         })
-        // console.log(sources)
     }
+    // console.log(qtpro, sources)
 
     return sources
 }
