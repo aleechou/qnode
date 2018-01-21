@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets network webengine webenginewidgets
+QT       += core gui widgets network webengine webenginewidgets network gui-private
 
 CONFIG += console
 
@@ -51,19 +51,47 @@ SOURCES += \
         $$PWD/src/common.cpp \
         $$PWD/src/qtobjectwrapper.cpp \
         $$PWD/src/qtsignalrouter.cc \
-        $$PWD/src/init.cpp
+        $$PWD/src/init.cpp \
+        $$PWD/src/qxtglobalshortcut5/qxtglobal.cpp \
+        $$PWD/src/qxtglobalshortcut5/qxtwindowsystem.cpp \
+        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut.cpp \
+        $$PWD/src/qxtglobalshortcut5/qxtwindowsystemimp.cpp \
+        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcutimp.cpp
 
 HEADERS += \
         $$PWD/src/browserwindow.h \
         $$PWD/src/common.h \
         $$PWD/src/qtobjectwrapper.h \
-    $$PWD/src/init.h
+        $$PWD/src/init.h \
+        $$PWD/src/qxtglobalshortcut5/qxtglobal.h \
+        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_p.h \
+        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut.h \
+        $$PWD/src/qxtglobalshortcut5/qxtwindowsystem.h
 
 FORMS += \
         $$PWD/src/browserwindow.ui
 
-#RESOURCES += \
-#    lib.qrc
+
+# for QxtGlobalShortcut
+unix:!macx:{ QT += x11extras }
+DEFINES += BUILD_QXT_CORE \
+    BUILD_QXT_GUI
+
+unix:!macx {
+    HEADERS += $$PWD/src/qxtglobalshortcut5/x11info.h
+    SOURCES += \
+            $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_x11.cpp \
+            $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_x11.cpp
+    CONFIG+= X11
+}
+macx: {
+    HEADERS  += $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_mac.h
+    QMAKE_LFLAGS += -framework Carbon -framework CoreFoundation
+}
+
+win32: {
+}
+
 
 
 

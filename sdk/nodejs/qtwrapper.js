@@ -1,5 +1,5 @@
 const EventEmitter = require('events')
-const qnode = require("../../.bin/qnode.node")
+const qnode = require( process.env.QNODEPATH || "../../.bin/qnode.node" )
 
 const NativeQtObjectWrapper = qnode.QtObjectWrapper
 

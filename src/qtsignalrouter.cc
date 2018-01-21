@@ -65,7 +65,7 @@ switch (wrapper->typeId) {    \
     \
     \
     /* start of class BrowserWindow */    \
-    case 1029:    \
+    case 1028:    \
         switch(sigindex){    \
     \
         case 0:    \
@@ -175,6 +175,63 @@ switch (wrapper->typeId) {    \
         }    \
     \
         /* end of class BrowserWindow */    \
+        break;    \
+    \
+    \
+    /* start of class QxtGlobalShortcut */    \
+    case 1029:    \
+        switch(sigindex){    \
+    \
+        case 0:    \
+            QObject::connect((QxtGlobalShortcut*)wrapper->object, &QxtGlobalShortcut::destroyed, postman, [wrapper,isolate](QObject*){    \
+                GET_NODEJS_LISTNER ;    \
+    \
+                const unsigned argc = 2;    \
+                Local<Value> argv[argc] = { Local<Value>::New(isolate, v8str("destroyed(QObject*)")) };    \
+                argv[1] = Local<Value>::New(isolate, v8str("unknow qt type (QObject*)")) ;    \
+                method->Call(wrapper->handle(), argc, argv);    \
+            }) ;    \
+            break;    \
+    \
+        case 1:    \
+            QObject::connect((QxtGlobalShortcut*)wrapper->object, &QxtGlobalShortcut::destroyed, postman, [wrapper,isolate](){    \
+                GET_NODEJS_LISTNER ;    \
+    \
+                const unsigned argc = 1;    \
+                Local<Value> argv[argc] = { Local<Value>::New(isolate, v8str("destroyed()")) };    \
+    \
+                method->Call(wrapper->handle(), argc, argv);    \
+            }) ;    \
+            break;    \
+    \
+        case 2:    \
+            QObject::connect((QxtGlobalShortcut*)wrapper->object, &QxtGlobalShortcut::objectNameChanged, postman, [wrapper,isolate](const QString & arg1){    \
+                GET_NODEJS_LISTNER ;    \
+    \
+                const unsigned argc = 2;    \
+                Local<Value> argv[argc] = { Local<Value>::New(isolate, v8str("objectNameChanged(QString)")) };    \
+                argv[1] = Local<Value>::New(isolate, v8string(arg1)) ;    \
+                method->Call(wrapper->handle(), argc, argv);    \
+            }) ;    \
+            break;    \
+    \
+        case 5:    \
+            QObject::connect((QxtGlobalShortcut*)wrapper->object, &QxtGlobalShortcut::activated, postman, [wrapper,isolate](){    \
+                GET_NODEJS_LISTNER ;    \
+    \
+                const unsigned argc = 1;    \
+                Local<Value> argv[argc] = { Local<Value>::New(isolate, v8str("activated()")) };    \
+    \
+                method->Call(wrapper->handle(), argc, argv);    \
+            }) ;    \
+            break;    \
+    \
+        default:    \
+            Throw("unknow sigindex")    \
+            return ;    \
+        }    \
+    \
+        /* end of class QxtGlobalShortcut */    \
         break;    \
     \
 default:    \

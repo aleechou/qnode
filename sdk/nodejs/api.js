@@ -1,4 +1,4 @@
-const qnode = require("../../.bin/qnode.node")
+const qnode = require(process.env.QNODEPATH || "../../.bin/qnode.node")
 const path = require("path")
 
 process.env.QNODE_SDKPATH = path.dirname(__dirname)

@@ -12,7 +12,8 @@
         "conditions": [
             ["OS=='linux'", {
                 "cflags": [
-                    "<!@(pkg-config --cflags Qt5Core Qt5Network Qt5Gui Qt5Widgets Qt5WebEngineCore Qt5WebEngine Qt5WebEngineWidgets)", "-Wcomment", "-Wparentheses"
+                    "-I/home/alee/Qt5.10.0/5.10.0/gcc_64/include/QtGui/5.10.0/QtGui",
+                    "<!@(pkg-config --cflags Qt5Core Qt5Network Qt5Gui Qt5Widgets Qt5WebEngineCore Qt5WebEngine Qt5WebEngineWidgets Qt5X11Extras)", "-Wcomment", "-Wparentheses"
                 ],
                 "ldflags": [
                     "<!@(pkg-config --libs-only-L --libs-only-other Qt5Core Qt5Network Qt5Gui Qt5Widgets Qt5WebEngineCore Qt5WebEngine Qt5WebEngineWidgets)", "-fexceptions",

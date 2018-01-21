@@ -1,9 +1,12 @@
+#!/usr/bin/env node
+
 const fs = require("fs")
-const qnode = require("../../")
+const qnode = require("../")
 
 var qtClasses = [
     'QObject*',
     'BrowserWindow*',
+    'QxtGlobalShortcut*',
 ]
 
 
@@ -131,7 +134,7 @@ function makeCpp() {
 
 
 var cppcode = makeCpp()
-fs.writeFile(__dirname + '/../../src/qtsignalrouter.cc', cppcode, (error) => {
+fs.writeFile(__dirname + '/../src/qtsignalrouter.cc', cppcode, (error) => {
     if (error) console.error(error)
     process.exit()
 })

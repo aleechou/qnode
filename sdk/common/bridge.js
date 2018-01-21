@@ -9,7 +9,7 @@ var isOrigin = typeof process !== 'undefined' && process.versions && process.ver
 
 // nodejs 环境
 if (isOrigin) {
-    var qnode = require("../../.bin/qnode.node")
+    var qnode = require(process.env.QNODEPATH || "../../.bin/qnode.node")
 }
 // 浏览器环境
 else {

@@ -3,6 +3,7 @@
 #include <QMetaMethod>
 #include "qtsignalrouter.cc"
 #include "browserwindow.h"
+#include "qxtglobalshortcut5/qxtglobalshortcut.h"
 
 using namespace v8;
 
