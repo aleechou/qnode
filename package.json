@@ -1,5 +1,5 @@
 {
-  "name": "qnode",
+  "name": "qnode-prebuilt-linux64",
   "version": "0.0.2",
   "description": "Another project of Qt + NodeJS",
   "main": "index.js",

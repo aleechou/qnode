@@ -1,8 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>sdk/webkit/require.js</file>
-        <file>sdk/boot.js</file>
-        <file>sdk/api.js</file>
-        <file>sdk/window.js</file>
-    </qresource>
-</RCC>

@@ -1,0 +1,11 @@
+build
+src
+lib.qrc
+qnode.pri
+qnode.pro
+qnode.pro.user
+tools
+deps
+.DS_Store
+node_modules
+package-lock.json
