@@ -1,5 +1,29 @@
 {
-  "dependencies": {
+  "name": "qnode",
+  "version": "0.0.2",
+  "description": "Another project of Qt + NodeJS",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
     "nan": "^2.8.0"
-  }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aleechou/qnode.git"
+  },
+  "keywords": [
+    "qt",
+    "nodejs",
+    "webengine",
+    "gui"
+  ],
+  "author": "aleechou",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aleechou/qnode/issues"
+  },
+  "homepage": "https://github.com/aleechou/qnode#readme"
 }
