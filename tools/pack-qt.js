@@ -4,17 +4,17 @@ const child_process = require("child_process")
 const fs = require("fs")
 const pt = require("path")
 
-module.exports = function(targetQnode, buildDir) {
+module.exports = function(targetQnode, buildQnode) {
 
     if(!targetQnode)
         targetQnode = __dirname + "/../.bin/qnode.node"
-    if(!buildDir)
-        buildDir = process.cwd()
+    buildDir = pt.dirname(buildQnode)
 
-    var buildQnode = buildDir + "/build/Release/qnode.node"
+    if(!buildQnode)
+        buildQnode = process.cwd() + "/build/Release/qnode.node"
     var targetDir = pt.dirname(targetQnode)
 
-    console.log(targetQnode, "-->>", buildQnode)
+    console.log(buildQnode, "-->>", targetQnode)
 
     // qnode.node 文件从编译目录，拷贝到目标目录
     mkdir(targetDir)

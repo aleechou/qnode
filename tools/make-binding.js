@@ -58,15 +58,19 @@ function parseSourceCpp(qtpro, sources) {
     if (res) {
 
         var files = res[1].split(":")
+        // console.log(files)
         files.forEach((file, i) => {
             file = file.trim()
             if (!file)
                 return
 
+            file = file.replace(/\$\$PWD/g, '')
+
             var srccpp = pt.normalize(qtdir + "/" + file)
             if(!sources.includes(srccpp))
                 sources.push(srccpp)
         })
+        // console.log(sources)
     }
 
     return sources

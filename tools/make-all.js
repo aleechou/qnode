@@ -23,8 +23,11 @@ module.exports = async function(qtpro, targetQnode, buildDir) {
     if(!buildDir)
         buildDir = process.cwd()
 
+    mkdir(buildDir)
+
     var oricwd = process.cwd()
     process.chdir(buildDir)
+
 
     // qmake 
     await exec("qmake", "CONFIG+=release", qtpro)
@@ -36,12 +39,18 @@ module.exports = async function(qtpro, targetQnode, buildDir) {
     await exec("node-gyp", "--release", "rebuild")
 
     // 打包
-    require("./pack-qt.js") ()
+    require("./pack-qt.js") ( targetQnode, buildDir+"/build/Release/qnode.node")
 
 
     process.chdir(oricwd)
 }
 
+
+function mkdir(path){
+    try {
+        fs.mkdirSync(path)
+    } catch (error) {}
+}
 
 if( process.argv[1] == __filename ) {
     module.exports(  )
