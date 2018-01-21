@@ -1,4 +1,0 @@
-qmake .. CONFIG+=release \
-    && ./tools/make-binding.js \
-    && node-gyp --release rebuild \
-    && ./tools/pack-qt.js

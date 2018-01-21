@@ -16,7 +16,7 @@ child_process.execFileSync("make", ["compiler_rcc_make_all"])
 var output = child_process.execFileSync("make", ["compiler_moc_header_make_all"])
 
 // 将 .pro 文件里的 source 文件写入到 binding.gyp
-var proFileContent = fs.readFileSync(__dirname + "/../../qnode.pri").toString()
+var proFileContent = fs.readFileSync(__dirname + "/../qnode.pri").toString()
 
 proFileContent = proFileContent
     .replace(/\\\r\n/g, ":")
@@ -33,7 +33,7 @@ if (res) {
         if (!file)
             return
 
-        fileBindingGyp.targets[0].sources.push(pt.relative(__dirname, __dirname + "/../../" + file))
+        fileBindingGyp.targets[0].sources.push(pt.relative(process.cwd(), __dirname + "/../" + file))
 
         var mocfilename = "moc_" + pt.parse(file).base
 
