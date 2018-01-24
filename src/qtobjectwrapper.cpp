@@ -2,9 +2,16 @@
 #include "common.h"
 #include <QMetaMethod>
 #include <QJsonObject>
-#include "qtsignalrouter.cc"
 #include "browserwindow.h"
 #include "qxtglobalshortcut5/qxtglobalshortcut.h"
+
+#ifndef QT_SIGNAL_ROUTER_FILE
+#include "qtsignalrouter.cc"
+#endif
+
+#ifdef QT_SIGNAL_ROUTER_FILE
+#include QT_SIGNAL_ROUTER_FILE
+#endif
 
 using namespace v8;
 
@@ -12,10 +19,10 @@ Persistent<Function> QtObjectWrapper::constructor;
 
 QtObjectWrapper::QtObjectWrapper(int typeId, Isolate* isolate)
     : isolate(isolate)
-    , typeId(typeId)
+    , m_typeId(typeId)
     , ObjectWrap()
 {
-    metaObject = QMetaType(typeId).metaObject();
+    metaObject = QMetaType(m_typeId).metaObject();
     this->object = metaObject->newInstance();
 }
 
@@ -34,6 +41,7 @@ void QtObjectWrapper::Init(Handle<Object> exports) {
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
     // Prototype
+    NODE_SET_PROTOTYPE_METHOD(tpl, "typeId", typeId);
     NODE_SET_PROTOTYPE_METHOD(tpl, "invoke", invoke);
     NODE_SET_PROTOTYPE_METHOD(tpl, "methodList", methodList);
     NODE_SET_PROTOTYPE_METHOD(tpl, "connectQtSignal", connectQtSignal);
@@ -284,3 +292,11 @@ void QtObjectWrapper::disconnectQtSignal(const FunctionCallbackInfo<Value>& args
     args.GetReturnValue().Set(v8::Boolean::New(isolate, true)) ;
 }
 
+
+void QtObjectWrapper::typeId(const FunctionCallbackInfo<Value>& args) {
+    v8::Isolate* isolate = args.GetIsolate();
+    QtObjectWrapper* wrapper = ObjectWrap::Unwrap<QtObjectWrapper>(args.Holder());
+    args.GetReturnValue().Set(v8int32(wrapper->m_typeId)) ;
+
+
+}

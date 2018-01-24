@@ -1,5 +1,5 @@
 const EventEmitter = require('events')
-const qnode = require( process.env.QNODEPATH || "../../.bin/qnode.node" )
+const qnode = require(process.env.QNODEPATH || "../../.bin/qnode.node")
 
 const NativeQtObjectWrapper = qnode.QtObjectWrapper
 
@@ -11,6 +11,8 @@ class QtObjectWrapper extends NativeQtObjectWrapper {
 
     constructor(className) {
         super(className)
+        console.log(className, this.typeId())
+
         EventEmitter.apply(this)
 
         this.className = className.replace(/\*/g, '').trim()

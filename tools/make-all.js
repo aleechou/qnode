@@ -14,44 +14,61 @@ function exec(cmd, ...args) {
     })
 }
 
-module.exports = async function(qtpro, targetQnode, buildDir) {
+module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses) {
+    var cflags = []
+    try {
 
-    if(!qtpro)
-        qtpro = __dirname + "/../qnode.pro"
-    if(!targetQnode)
-        targetQnode = __dirname + "/../.bin/qnode.node"
-    if(!buildDir)
-        buildDir = process.cwd()
+        if (!qtpro)
+            qtpro = __dirname + "/../qnode.pro"
+        if (!targetQnode)
+            targetQnode = __dirname + "/../.bin/qnode.node"
+        if (!buildDir)
+            buildDir = process.cwd()
 
-    mkdir(buildDir)
+        mkdir(buildDir)
 
-    var oricwd = process.cwd()
-    process.chdir(buildDir)
+        var signalRouterFile = buildDir + "/qtsignalrouter.cc"
 
-
-    // qmake 
-    await exec("qmake", "CONFIG+=release", qtpro)
-
-    // 生成 bingding.gyp
-    require("./make-binding.js") (qtpro, buildDir + "/binding.gyp")
-
-    // 编译
-    await exec("node-gyp", "--release", "rebuild")
-
-    // 打包
-    require("./pack-qt.js") ( targetQnode, buildDir+"/build/Release/qnode.node")
+        // 生成 qt 信号连接 c++ 代码
+        if (fs.existsSync(targetQnode)) {
+            cflags.push("-DQT_SIGNAL_ROUTER_FILE=\"" + signalRouterFile + "\"")
+            require("./make-qtclass-signals")(signalRouterFile, nativeClasses || [])
+        }
 
 
-    process.chdir(oricwd)
+        var oricwd = process.cwd()
+        process.chdir(buildDir)
+
+
+        // qmake 
+        await exec("qmake", "CONFIG+=release", qtpro)
+
+        // 生成 bingding.gyp
+        require("./make-binding.js")(qtpro, buildDir + "/binding.gyp", cflags)
+
+        // 编译
+        await exec("node-gyp", "--release", "rebuild")
+
+        // 打包
+        require("./pack-qt.js")(targetQnode, buildDir + "/build/Release/qnode.node")
+
+
+        process.chdir(oricwd)
+
+    } catch (e) {
+        console.error(e)
+    }
+
+    process.exit()
 }
 
 
-function mkdir(path){
+function mkdir(path) {
     try {
         fs.mkdirSync(path)
     } catch (error) {}
 }
 
-if( process.argv[1] == __filename ) {
-    module.exports(  )
+if (process.argv[1] == __filename) {
+    module.exports()
 }

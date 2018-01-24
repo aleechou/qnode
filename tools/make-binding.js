@@ -4,9 +4,9 @@ const fs = require("fs")
 const child_process = require("child_process")
 const pt = require("path")
 
-module.exports = function(qtpro, bindingPath) {
+module.exports = function(qtpro, bindingPath, cflags) {
 
-    if(!bindingPath) {
+    if (!bindingPath) {
         bindingPath = process.cwd() + "/binding.gyp"
     }
     var bingdingDir = pt.dirname(bindingPath)
@@ -24,22 +24,26 @@ module.exports = function(qtpro, bindingPath) {
     var fileBindingGyp = require(__dirname + "/binding.gyp.json")
 
     var sources = parseSourceCpp(__dirname + "/../qnode.pri", [])
-    if(qtpro)
+    if (qtpro)
         sources = parseSourceCpp(qtpro, sources)
 
     sources.forEach((file, i) => {
 
-            fileBindingGyp.targets[0].sources.push(pt.relative(bingdingDir, file))
+        fileBindingGyp.targets[0].sources.push(pt.relative(bingdingDir, file))
 
-            var mocfilename = "moc_" + pt.parse(file).base
+        var mocfilename = "moc_" + pt.parse(file).base
 
-            var mocfile = "output/Release/moc/" + mocfilename
-            if (fs.existsSync(mocfile)) {
-                fileBindingGyp.targets[0].sources.push("output/Release/moc/" + mocfilename)
-            }
-        })
+        var mocfile = "output/Release/moc/" + mocfilename
+        if (fs.existsSync(mocfile)) {
+            fileBindingGyp.targets[0].sources.push("output/Release/moc/" + mocfilename)
+        }
+    })
 
     console.log(fileBindingGyp.targets[0].sources)
+
+    if (cflags) {
+        fileBindingGyp.targets[0].cflags = (fileBindingGyp.targets[0].cflags || []).concat(cflags)
+    }
 
     fs.writeFileSync(bindingPath, JSON.stringify(fileBindingGyp, null, 4))
 }
@@ -66,7 +70,7 @@ function parseSourceCpp(qtpro, sources) {
             file = file.replace(/\$\$PWD/g, '')
 
             var srccpp = pt.normalize(qtdir + "/" + file)
-            if(!sources.includes(srccpp))
+            if (!sources.includes(srccpp))
                 sources.push(srccpp)
         })
     }
@@ -77,6 +81,6 @@ function parseSourceCpp(qtpro, sources) {
 
 
 
-if( process.argv[1] == __filename ) {
-    module.exports(  )
+if (process.argv[1] == __filename) {
+    module.exports()
 }

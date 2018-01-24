@@ -19,8 +19,6 @@ function parseClassInfo(typeName) {
 
     var className = typeName.replace(/\*/g, '').trim()
 
-    // console.log("typeid",typeid)
-
 
     var cppcode = `
 
@@ -32,7 +30,6 @@ function parseClassInfo(typeName) {
     methods.forEach((meta) => {
         if (meta.type != 1) return
 
-        // console.log(meta.params)
         var cppParamList = []
         var paramConv = []
         meta.params.forEach((paramMeta, i) => {
@@ -52,9 +49,7 @@ function parseClassInfo(typeName) {
                 paramConv.push(`                argv[${i+1}] = Local<Value>::New(isolate, v8str("unknow qt type (${paramMeta.type})")) ;`)
             }
         })
-        console.log(meta.signature)
-            // console.log(meta.idx, className, meta.signature)
-            // Local<Value>::New(isolate, v8string(signalSignature))
+        console.log(className + "(" + typeid + ")", meta.idx, meta.signature)
 
         var funccode = `[wrapper,isolate](${cppParamList.join(', ')}){
                 GET_NODEJS_LISTNER ;
@@ -74,7 +69,7 @@ ${paramConv.join("\\\r\n")}
 
     cppcode += `
         default:
-            Throw("unknow sigindex")
+            Throw( QString("unknow sigindex: %1, for qt native class: QxtGlobalShortcut (typeId: %2)").arg(sigindex).arg(wrapper->m_typeId).toStdString().c_str() )
             return ;
         }
 
@@ -88,7 +83,7 @@ ${paramConv.join("\\\r\n")}
 function parseAllClasses() {
 
     var cppcode = `
-switch (wrapper->typeId) {
+switch (wrapper->m_typeId) {
 `
 
     qtClasses.forEach((className) => {
@@ -97,9 +92,9 @@ switch (wrapper->typeId) {
 
 
     cppcode += `
-default:
-    Throw("unknow typeId")
-    return;
+    default:
+        Throw( QString("unknow typeId: %1").arg(wrapper->m_typeId).toStdString().c_str() )
+        return;
 }
 `
 
@@ -132,9 +127,7 @@ function makeCpp() {
     }, []).join("\r\n") + "\r\n"
 }
 
-
-var cppcode = makeCpp()
-fs.writeFile(__dirname + '/../src/qtsignalrouter.cc', cppcode, (error) => {
-    if (error) console.error(error)
-    process.exit()
-})
+module.exports = function(outputPath, nativeClasses) {
+    var cppcode = makeCpp(qtClasses.concat(nativeClasses || []))
+    fs.writeFileSync(outputPath, cppcode)
+}

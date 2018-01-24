@@ -67,10 +67,8 @@ Local<Value> qtjsonToV8(Isolate * isolate, const QJsonValue & value) {
     }
     else if(value.isArray()) {
         QJsonArray arrValue = value.toArray() ;
-        qDebug() << arrValue.count() ;
         Local<Array> array = Array::New(isolate, arrValue.count()) ;
         for(int i=0; i<arrValue.count(); i++) {
-            qDebug() << i << arrValue.at(i) ;
             array->Set(i, qtjsonToV8(isolate, arrValue.at(i))) ;
         }
         return array ;

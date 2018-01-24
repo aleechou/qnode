@@ -6,9 +6,10 @@
         "include_dirs": [
             "<!(node -e \"require('nan')\")",
             "./"
-        ]
+        ],
+        "cflags": [],
 
-        ,
+
         "conditions": [
             ["OS=='linux'", {
                 "cflags": [
