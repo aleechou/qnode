@@ -11,7 +11,6 @@ class QtObjectWrapper extends NativeQtObjectWrapper {
 
     constructor(className) {
         super(className)
-        console.log(className, this.typeId())
 
         EventEmitter.apply(this)
 
