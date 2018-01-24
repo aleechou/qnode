@@ -1,2 +1,2 @@
-var qnode = module.exports = require("./.bin/qnode")
+var qnode = module.exports = require(process.env.QNODEPATH || "./.bin/qnode.node")
 require("./sdk/nodejs/boot.js")

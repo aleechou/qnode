@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets network webengine webenginewidgets network gui-private
+QT      += core gui widgets network webengine webenginewidgets network serialport gui-private
 
 CONFIG += console
 

@@ -1,4 +1,9 @@
 #include "common.h"
+#include <QJsonValue>
+#include <QJsonArray>
+#include <QJsonObject>
+
+using namespace v8;
 
 v8::Local<v8::String> JsonStringify(v8::Isolate * isolate, v8::Local<v8::Value> value){
 
@@ -47,4 +52,68 @@ void runNodeScript(const QString & script) {
     v8::HandleScope scope(isolate);
 
     v8::Script::Compile ( v8string(script) )->Run();
+}
+
+
+Local<Value> qtjsonToV8(Isolate * isolate, const QJsonValue & value) {
+    if(value.isString()) {
+        return v8string(value.toString()) ;
+    }
+    else if(value.isDouble()) {
+        return v8int32(value.toDouble()) ;
+    }
+    else if(value.isBool()) {
+        return v8::Boolean::New(isolate, value.toBool()) ;
+    }
+    else if(value.isArray()) {
+        QJsonArray arrValue = value.toArray() ;
+        qDebug() << arrValue.count() ;
+        Local<Array> array = Array::New(isolate, arrValue.count()) ;
+        for(int i=0; i<arrValue.count(); i++) {
+            qDebug() << i << arrValue.at(i) ;
+            array->Set(i, qtjsonToV8(isolate, arrValue.at(i))) ;
+        }
+        return array ;
+    }
+    else if(value.isObject()) {
+        QJsonObject objValue = value.toObject() ;
+        Local<Object> object = Object::New(isolate) ;
+        foreach(QString key, objValue.keys()){
+            object->Set(v8string(key), qtjsonToV8(isolate, objValue.value(key))) ;
+        }
+        return object ;
+    }
+    else if(value.isNull()) {
+        return v8::Null(isolate) ;
+    }
+    else if(value.isUndefined()) {
+        return v8::Undefined(isolate) ;
+    }
+    else {
+        return v8str("--unknow qt type--") ;
+    }
+}
+
+Local<Value> qvariantToV8(Isolate * isolate, const QVariant & value) {
+    int type = value.type() ;
+    if( type == QVariant::String ){
+        return v8string(value.toString()) ;
+    }
+    else if( type == QVariant::Int || type == QVariant::UInt || type == QVariant::LongLong || type == QVariant::ULongLong ){
+        return v8int32(value.toULongLong()) ;
+    }
+    else if( type == QVariant::Double ){
+        return v8::Number::New(isolate, value.toDouble()) ;
+    }
+    else if( type == QVariant::Bool ){
+        return v8::Boolean::New(isolate, value.toBool()) ;
+    }
+
+    // json
+    else if( type == QMetaType::QJsonObject || type == QMetaType::QJsonArray || type == QMetaType::QJsonValue ){
+        return qtjsonToV8(isolate, value.toJsonValue()) ;
+    }
+    else {
+        return v8str("--unknow qt type--") ;
+    }
 }

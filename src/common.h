@@ -39,9 +39,10 @@
                         global->Get(v8::String::NewFromUtf8(isolate, valueName));
 
 v8::Local<v8::String> JsonStringify(v8::Isolate * isolate, v8::Local<v8::Value> value);
-
 v8::Local<v8::Value> JsonParse(v8::Isolate * isolate, const QByteArray & data);
 
+v8::Local<v8::Value> qtjsonToV8(v8::Isolate * isolate, const QJsonValue & value) ;
+v8::Local<v8::Value> qvariantToV8(v8::Isolate * isolate, const QVariant & value) ;
 
 void setMainIsolate(v8::Isolate *) ;
 

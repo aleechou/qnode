@@ -1,6 +1,7 @@
 #include "qtobjectwrapper.h"
 #include "common.h"
 #include <QMetaMethod>
+#include <QJsonObject>
 #include "qtsignalrouter.cc"
 #include "browserwindow.h"
 #include "qxtglobalshortcut5/qxtglobalshortcut.h"
@@ -191,19 +192,7 @@ void QtObjectWrapper::invoke(const FunctionCallbackInfo<Value>& args) {
             return ;
         }
 
-        int type = returnValue.type() ;
-        if( type == QVariant::String ){
-            args.GetReturnValue().Set(v8string(returnValue.toString())) ;
-        }
-        else if( type == QVariant::Bool ){
-            args.GetReturnValue().Set(v8::Boolean::New(isolate, returnValue.toBool())) ;
-        }
-        else if( type >= QVariant::Int && type <= QVariant::ULongLong ){
-            args.GetReturnValue().Set(v8int32(returnValue.toULongLong())) ;
-        }
-        else if( type >= QVariant::Double ){
-            args.GetReturnValue().Set(v8::Number::New(isolate, returnValue.toDouble())) ;
-        }
+        args.GetReturnValue().Set(qvariantToV8(isolate, returnValue)) ;
     }
 }
 
