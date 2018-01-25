@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
 const fs = require("fs")
-const qnode = require("../")
 
-var qtClasses = [
+var qtBaseClasses = [
     'QObject*',
     'BrowserWindow*',
     'QxtGlobalShortcut*',
@@ -13,7 +12,12 @@ var qtClasses = [
 var qtNumberTypes = ['int', 'unsigned int', 'uint', 'long', 'ulong', 'longlong', 'ulonglong']
 
 
-function parseClassInfo(typeName) {
+function parseClassInfo(qnode, typeName) {
+
+    if (!qnode) {
+        qnode = require("../")
+    }
+
     var typeid = eval(qnode.qtTypeId(typeName))
     var methods = eval(qnode.qtClassMeta(typeName))
 
@@ -80,14 +84,14 @@ ${paramConv.join("\\\r\n")}
     return cppcode
 }
 
-function parseAllClasses() {
+function parseAllClasses(qnode, qtClasses) {
 
     var cppcode = `
 switch (wrapper->m_typeId) {
 `
 
     qtClasses.forEach((className) => {
-        cppcode += parseClassInfo(className)
+        cppcode += parseClassInfo(qnode, className)
     })
 
 
@@ -102,10 +106,19 @@ switch (wrapper->m_typeId) {
 }
 
 
-function makeCpp() {
-    var cppcode = parseAllClasses(qtClasses)
+function makeCpp(qnode, qtClasses) {
+
+    var cppIncludes = ""
+    Object.values(qtClasses).forEach((path) => {
+        cppIncludes += `#include "${path}"`
+    })
+
+    var cppcode = parseAllClasses(qnode, qtBaseClasses.concat(Object.keys(qtClasses)))
 
     return `
+${cppIncludes}
+
+
 #define GET_NODEJS_LISTNER \\
     \\
     HandleScope scope(isolate);\\
@@ -127,7 +140,7 @@ function makeCpp() {
     }, []).join("\r\n") + "\r\n"
 }
 
-module.exports = function(outputPath, nativeClasses) {
-    var cppcode = makeCpp(qtClasses.concat(nativeClasses || []))
+module.exports = function(qnode, outputPath, nativeClasses) {
+    var cppcode = makeCpp(qnode, nativeClasses || {})
     fs.writeFileSync(outputPath, cppcode)
 }

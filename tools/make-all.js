@@ -31,8 +31,8 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses) {
 
         // 生成 qt 信号连接 c++ 代码
         if (fs.existsSync(targetQnode)) {
+            require("./make-qtclass-signals")(require(targetQnode), signalRouterFile, nativeClasses || [])
             cflags.push("-DQT_SIGNAL_ROUTER_FILE=\"" + signalRouterFile + "\"")
-            require("./make-qtclass-signals")(signalRouterFile, nativeClasses || [])
         }
 
 

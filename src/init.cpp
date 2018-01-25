@@ -78,7 +78,8 @@ void jsQtClassMeta(const Nan::FunctionCallbackInfo<v8::Value>& args){
     QByteArray className = qtstring(args[0]) ;
     int typeId = QMetaType::type(className);
     if(QMetaType::UnknownType==typeId) {
-        Throw("unknow qt class, you must call qRegisterMetaType first.")
+        Throw( QString("unknow qt class `%1`, you must call qRegisterMetaType first.").arg(className.toStdString().c_str()).toStdString().c_str() )
+        return ;
     }
 
     v8::Isolate * isolate = args.GetIsolate() ;

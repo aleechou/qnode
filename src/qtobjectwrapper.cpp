@@ -5,10 +5,6 @@
 #include "browserwindow.h"
 #include "qxtglobalshortcut5/qxtglobalshortcut.h"
 
-#ifndef QT_SIGNAL_ROUTER_FILE
-#include "qtsignalrouter.cc"
-#endif
-
 #ifdef QT_SIGNAL_ROUTER_FILE
 #include QT_SIGNAL_ROUTER_FILE
 #endif
@@ -262,7 +258,13 @@ void QtObjectWrapper::connectQtSignal(const FunctionCallbackInfo<Value>& args) {
 
     QObject * postman = new QObject(wrapper->object) ;
 
+#ifdef ConnectSignalAndSlot
     ConnectSignalAndSlot ;
+#endif
+
+#ifdef ConnectSignalAndSlot
+    qDebug() << "no macro: ConnectSignalAndSlot" ;
+#endif
 
     wrapper->signalReceivers.insert(sigindex, postman) ;
 
