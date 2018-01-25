@@ -50,7 +50,7 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses) {
         await exec("node-gyp", "--release", "rebuild")
 
         // 打包
-        require("./pack-qt.js")(targetQnode, buildDir + "/build/Release/qnode.node")
+        await require("./pack-qt.js")(targetQnode, buildDir + "/build/Release/qnode.node")
 
 
         process.chdir(oricwd)
@@ -59,6 +59,7 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses) {
         console.error(e)
     }
 
+    console.log("done")
     process.exit()
 }
 

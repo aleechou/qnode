@@ -3,14 +3,17 @@
 const child_process = require("child_process")
 const fs = require("fs")
 const pt = require("path")
+const util = require("util")
 
-module.exports = function(targetQnode, buildQnode) {
+const copyFile = util.promisify(fs.copyFile)
 
-    if(!targetQnode)
+module.exports = async function(targetQnode, buildQnode) {
+
+    if (!targetQnode)
         targetQnode = __dirname + "/../.bin/qnode.node"
     buildDir = pt.dirname(buildQnode)
 
-    if(!buildQnode)
+    if (!buildQnode)
         buildQnode = process.cwd() + "/build/Release/qnode.node"
     var targetDir = pt.dirname(targetQnode)
 
@@ -18,25 +21,25 @@ module.exports = function(targetQnode, buildQnode) {
 
     // qnode.node 文件从编译目录，拷贝到目标目录
     mkdir(targetDir)
-    fs.copyFileSync(buildQnode, targetQnode)
+    child_process.execFileSync("cp", [buildQnode, targetQnode])
 
     // 连续执行两遍,
     // 第一遍执行时,如果 qnode.node 找不到 libQt5Core.so.5 ,
     // 则用 ldd 查看依赖 libicui18n.so 的版本会是 55 , Qt5.9并未提供. 
-    packDeps()
+    await packDeps()
 
     // 第二遍,在提供正确 libQt5Core 之后,
     // ldd 会返回依赖项 libicui18n.so.56
-    packDeps()
+    await packDeps()
 
 
-    function packDeps() {
+    async function packDeps() {
 
         console.log("copy deps:")
 
         // 查看并分析 qnode.node 的依赖项
         var libs = []
-        var output = child_process.execFileSync("ldd", ["-v", targetQnode]).toString()
+        var output = (child_process.execFileSync("ldd", ["-v", targetQnode])).toString()
             // console.log(output)
 
         var res = matchAll(/([^\s]+?) (\([^\)]+ \))?=> /g, output)
@@ -48,7 +51,7 @@ module.exports = function(targetQnode, buildQnode) {
 
 
         // 用 pkg-config 查找 qt安装目录
-        ouput = child_process.execFileSync("pkg-config", ["--libs-only-L", "Qt5Core"]).toString()
+        ouput = (child_process.execFileSync("pkg-config", ["--libs-only-L", "Qt5Core"])).toString()
         var qtlib = ouput.trim().replace(/^\-L/, '')
 
 
@@ -63,7 +66,7 @@ module.exports = function(targetQnode, buildQnode) {
             var targetpath = targetDir + "/" + libfile
 
             try {
-                fs.copyFileSync(libpath, targetpath)
+                child_process.execFileSync("cp", [libpath, targetpath])
             } catch (error) {}
 
             console.log(libpath, "=>", targetpath)
@@ -72,7 +75,7 @@ module.exports = function(targetQnode, buildQnode) {
 }
 
 
-function mkdir(path){
+function mkdir(path) {
     try {
         fs.mkdirSync(path)
     } catch (error) {}
@@ -93,6 +96,6 @@ function matchAll(regexp, text) {
 
 
 
-if( process.argv[1] == __filename ) {
-    module.exports(  )
+if (process.argv[1] == __filename) {
+    module.exports()
 }
