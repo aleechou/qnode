@@ -142,5 +142,8 @@ ${cppIncludes}
 
 module.exports = function(qnode, outputPath, nativeClasses) {
     var cppcode = makeCpp(qnode, nativeClasses || {})
+
+    console.log("write cpp file .. ", outputPath)
     fs.writeFileSync(outputPath, cppcode)
+    console.log("done")
 }

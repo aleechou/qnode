@@ -9,6 +9,7 @@ function exec(cmd, ...args) {
     return new Promise((resolve) => {
         var chdproc = child_process.execFile(cmd, args);
         chdproc.on('exit', resolve)
+        chdproc.on('error', console.error)
         chdproc.stderr.pipe(process.stderr)
         chdproc.stdout.pipe(process.stdout)
     })
@@ -29,16 +30,14 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses) {
 
         var signalRouterFile = buildDir + "/qtsignalrouter.cc"
 
-        // 生成 qt 信号连接 c++ 代码
-        // if (fs.existsSync(targetQnode)) {
-        //     require("./make-qtclass-signals")(require(targetQnode), signalRouterFile, nativeClasses || [])
-        //     cflags.push("-DQT_SIGNAL_ROUTER_FILE=\"" + signalRouterFile + "\"")
-        // }
-
+        // 生成 qt 信号连接 c++代码
+        if (fs.existsSync(targetQnode)) {
+            require("./make-qtclass-signals")(require(targetQnode), signalRouterFile, nativeClasses || [])
+            cflags.push("-DQT_SIGNAL_ROUTER_FILE=\"" + signalRouterFile + "\"")
+        }
 
         var oricwd = process.cwd()
         process.chdir(buildDir)
-
 
         // qmake 
         await exec("qmake", "CONFIG+=release", qtpro)
@@ -47,6 +46,7 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses) {
         require("./make-binding.js")(qtpro, buildDir + "/binding.gyp", cflags)
 
         // 编译
+        console.log("build qnode by node-gyp")
         await exec("node-gyp", "--release", "rebuild")
 
         // 打包
