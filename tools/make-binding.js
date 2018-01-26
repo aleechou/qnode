@@ -73,7 +73,6 @@ module.exports = function(qtpro, bindingPath, cflags) {
         default:
             throw new Error("unknow platform " + process.platform, )
     }
-    delete fileBindingGyp.qtlibs
 
     fs.writeFileSync(bindingPath, JSON.stringify(fileBindingGyp, null, 4))
 }

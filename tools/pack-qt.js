@@ -7,15 +7,15 @@ const util = require("util")
 
 const copyFile = util.promisify(fs.copyFile)
 
-module.exports = async function(targetQnode, buildQnode) {
+async function pack4linux(targetQnode, buildQnode) {
 
     if (!targetQnode)
         targetQnode = __dirname + "/../.bin/qnode.node"
-    buildDir = pt.dirname(buildQnode)
+    var targetDir = pt.dirname(targetQnode)
 
     if (!buildQnode)
         buildQnode = process.cwd() + "/build/Release/qnode.node"
-    var targetDir = pt.dirname(targetQnode)
+    buildDir = pt.dirname(buildQnode)
 
     console.log(buildQnode, "-->>", targetQnode)
 
@@ -74,6 +74,42 @@ module.exports = async function(targetQnode, buildQnode) {
     }
 }
 
+async function pack4darwin(targetQnode, buildQnode) {
+
+    if (!targetQnode)
+        targetQnode = __dirname + "/../.bin/qnode.node"
+    var targetDir = pt.dirname(targetQnode)
+
+    if (!buildQnode)
+        buildQnode = process.cwd() + "/build/Release/qnode.node"
+    buildDir = pt.dirname(buildQnode)
+
+    console.log(buildQnode, "-->>", targetQnode)
+
+    // qnode.node 文件从编译目录，拷贝到目标目录
+    mkdir(targetDir)
+    child_process.execFileSync("cp", [buildQnode, targetQnode])
+
+    // mkdir Contents/Frameworks
+    var frameworksDir = targetDir + "/../Contents/Frameworks"
+    if (!fs.existsSync(frameworksDir)) {
+        child_process.execFileSync('mkdir', ["-p", frameworksDir])
+    }
+
+    var qtpath = child_process.execFileSync("qmake", ["-query", "QT_INSTALL_PREFIX"]).toString().trim()
+
+
+    var binding = require("./binding.gyp.json")
+    console.log(binding)
+    binding.qtlibs.forEach((libname) => {
+        var dist = frameworksDir + "/" + libname + '.framework'
+        if (!fs.existsSync(dist)) {
+            var src = qtpath + '/lib/' + libname + '.framework'
+            console.log("cp framework:", src, "->", dist)
+            child_process.execFileSync('ln', ["-s", src, dist])
+        }
+    })
+}
 
 function mkdir(path) {
     try {
@@ -93,7 +129,10 @@ function matchAll(regexp, text) {
     return ret
 }
 
-
+if (process.platform == 'darwin')
+    module.exports = pack4darwin
+else
+    module.exports = pack4linux
 
 
 if (process.argv[1] == __filename) {

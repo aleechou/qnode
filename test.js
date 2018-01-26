@@ -1,4 +1,4 @@
-const qnode = require("..")
+const qnode = require(".")
 
 global.$store = qnode.bridge.object({
     a: 1,

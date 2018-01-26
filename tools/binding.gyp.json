@@ -5,7 +5,9 @@
         "build_dir": "output",
         "include_dirs": [
             "<!(node -e \"require('nan')\")",
-            "./"
+            "./",
+            "/Users/alee/project/qnode/lib/includes",
+            "/Users/alee/project/qnode/lib/includes/QtCore"
         ],
         "cflags": [],
 
@@ -30,7 +32,7 @@
             }],
             ["OS=='mac'", {
                 "libraries": [
-                    "-Wl,-rpath,@loader_path/../../Contents/Frameworks",
+                    "-Wl,-rpath,@loader_path/../Contents/Frameworks",
                     "-F<!@(qmake -query 'QT_INSTALL_PREFIX')/lib"
                 ]
             }],
