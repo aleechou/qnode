@@ -9,6 +9,7 @@
 #include "qtobjectwrapper.h"
 #include "browserwindow.h"
 #include "qxtglobalshortcut5/qxtglobalshortcut.h"
+#include <QtCore/QVariant>
 
 
 void messageOutputFilter(QtMsgType type, const QMessageLogContext &context, const QString &msg)

@@ -48,3 +48,12 @@ node-gyp rebuild
     ```
     export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:<Qt安装目录>/5.9/gcc_64/lib/pkgconfig/
     ```
+
+
+3. 在 macOS 上，可以用 `install_name_tool` 来指定 `rpath` 的搜索路径，替代linux上的 `-Wl,-O1 -Wl,-rpath,\\$$ORIGIN:$ORIGIN`
+
+```
+install_name_tool -add_rpath "@loader_path/../../Contents/Frameworks" build/Release/qnode.node
+```
+
+> 由于 `qnode.node` 是被 node 加载的动态链接库，所有用 `@loader_path` 表示 `qnode.node` 所在路径；

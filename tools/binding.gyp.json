@@ -13,7 +13,7 @@
         "conditions": [
             ["OS=='linux'", {
                 "cflags": [
-                    "-I/home/alee/Qt5.10.0/5.10.0/gcc_64/include/QtGui/5.10.0/QtGui",
+                    "-I<!@(qmake -query 'QT_INSTALL_PREFIX')/include/QtGui/<!@(qmake -query 'QT_VERSION')/QtGui",
                     "<!@(pkg-config --cflags Qt5Core Qt5Network Qt5Gui Qt5Widgets Qt5WebEngineCore Qt5WebEngine Qt5WebEngineWidgets Qt5X11Extras Qt5SerialPort)", "-Wcomment", "-Wparentheses"
                 ],
                 "ldflags": [
@@ -28,6 +28,12 @@
                 "cflags_cc!": ["-fno-exceptions", "-Wno-comment", "-Wno-parentheses"]
 
             }],
+            ["OS=='mac'", {
+                "libraries": [
+                    "-Wl,-rpath,@loader_path/../../Contents/Frameworks",
+                    "-F<!@(qmake -query 'QT_INSTALL_PREFIX')/lib"
+                ]
+            }],
             ["OS=='win'", {
                 "include_dirs": [],
                 "libraries": []
@@ -35,4 +41,22 @@
         ]
 
     }]
+
+    ,
+    "qtlibs": [
+        "QtCore",
+        "QtNetwork",
+        "QtGui",
+        "QtWidgets",
+        "QtQml",
+        "QtQuick",
+        "QtWebChannel",
+        "QtPositioning",
+        "QtPrintSupport",
+        "QtQuickWidgets",
+        "QtWebEngineCore",
+        "QtWebEngine",
+        "QtWebEngineWidgets",
+        "QtSerialPort"
+    ]
 }
