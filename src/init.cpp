@@ -1,15 +1,16 @@
 #include "init.h"
+#include <iostream>
 #include <QApplication>
 #include <QDebug>
 #include <QAbstractEventDispatcher>
 #include <QFile>
-#include <iostream>
 #include <QMetaMethod>
+#include <QWebEngineProfile>
 #include "common.h"
 #include "qtobjectwrapper.h"
 #include "browserwindow.h"
 #include "qxtglobalshortcut5/qxtglobalshortcut.h"
-#include <QtCore/QVariant>
+#include "requireurlschemehandler.h"
 
 
 void messageOutputFilter(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -134,6 +135,14 @@ void QNodeInit(v8::Local<v8::Object> exports) {
         QCoreApplication::instance()->eventDispatcher()->processEvents(QEventLoop::EventLoopExec) ;
     }) ;
 
+    // sheme "require://" for webengine page
+    QWebEngineProfile * profile = QWebEngineProfile::defaultProfile() ;
+    if (!profile->urlSchemeHandler("require")) {
+        RequireUrlSchemeHandler * handler = new RequireUrlSchemeHandler(profile) ;
+        profile->installUrlSchemeHandler("require", handler);
+    }
+
+    // export functions to nodejs
     ExportFunction(exports, "readQrc", jsReadQrc)
     ExportFunction(exports, "qtClassMeta", jsQtClassMeta)
     ExportFunction(exports, "qtTypeId", jsQtTypeId)

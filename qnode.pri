@@ -57,7 +57,8 @@ SOURCES += \
         $$PWD/src/qxtglobalshortcut5/qxtwindowsystem.cpp \
         $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut.cpp \
         $$PWD/src/qxtglobalshortcut5/qxtwindowsystemimp.cpp \
-        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcutimp.cpp
+        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcutimp.cpp \
+        $$PWD/src/requireurlschemehandler.cpp
 
 HEADERS += \
         $$PWD/src/browserwindow.h \
@@ -67,7 +68,8 @@ HEADERS += \
         $$PWD/src/qxtglobalshortcut5/qxtglobal.h \
         $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_p.h \
         $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut.h \
-        $$PWD/src/qxtglobalshortcut5/qxtwindowsystem.h
+        $$PWD/src/qxtglobalshortcut5/qxtwindowsystem.h \
+        $$PWD/src/requireurlschemehandler.h
 
 FORMS += \
         $$PWD/src/browserwindow.ui

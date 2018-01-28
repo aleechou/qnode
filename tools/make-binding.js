@@ -70,6 +70,8 @@ module.exports = function(qtpro, bindingPath, cflags) {
                 }
             })
             break
+        case 'linux':
+            break
         default:
             throw new Error("unknow platform " + process.platform, )
     }

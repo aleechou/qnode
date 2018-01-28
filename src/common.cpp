@@ -40,18 +40,18 @@ v8::Isolate * mainIsolate() {
     return globalMainIsolate ;
 }
 
-void runNodeScript(const QString & script) {
+Local<Value> runNodeScript(const QString & script) {
 
     v8::Isolate * isolate = mainIsolate() ;
 
     if( !isolate ){
         qDebug() << "can not call runScript(), isolate is null" ;
-        return ;
+        return v8::Undefined(isolate);
     }
 
     v8::HandleScope scope(isolate);
 
-    v8::Script::Compile ( v8string(script) )->Run();
+    return v8::Script::Compile ( v8string(script) )->Run();
 }
 
 

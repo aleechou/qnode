@@ -48,7 +48,7 @@ void setMainIsolate(v8::Isolate *) ;
 
 v8::Isolate * mainIsolate() ;
 
-void runNodeScript(const QString &) ;
+v8::Local<v8::Value> runNodeScript(const QString &) ;
 
 
 //#define qd(sth) std::cout << "@" << __LINE__ << " " << sth << std::endl << std::flush;
