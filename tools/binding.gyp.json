@@ -60,6 +60,6 @@
         "QtWebEngine",
         "QtWebEngineWidgets",
         "QtSerialPort",
-        "Qt5Multimedia"
+        "QtMultimedia"
     ]
 }
