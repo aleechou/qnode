@@ -16,14 +16,14 @@
             ["OS=='linux'", {
                 "cflags": [
                     "-I<!@(qmake -query 'QT_INSTALL_PREFIX')/include/QtGui/<!@(qmake -query 'QT_VERSION')/QtGui",
-                    "<!@(pkg-config --cflags Qt5Core Qt5Network Qt5Gui Qt5Widgets Qt5WebEngineCore Qt5WebEngine Qt5WebEngineWidgets Qt5X11Extras Qt5SerialPort)", "-Wcomment", "-Wparentheses"
+                    "<!@(pkg-config --cflags Qt5Core Qt5Network Qt5Gui Qt5Widgets Qt5WebEngineCore Qt5WebEngine Qt5WebEngineWidgets Qt5X11Extras Qt5SerialPort Qt5Multimedia)", "-Wcomment", "-Wparentheses"
                 ],
                 "ldflags": [
-                    "<!@(pkg-config --libs-only-L --libs-only-other Qt5Core Qt5Network Qt5Gui Qt5Widgets Qt5WebEngineCore Qt5WebEngine Qt5WebEngineWidgets Qt5X11Extras Qt5SerialPort)", "-fexceptions",
+                    "<!@(pkg-config --libs-only-L --libs-only-other Qt5Core Qt5Network Qt5Gui Qt5Widgets Qt5WebEngineCore Qt5WebEngine Qt5WebEngineWidgets Qt5X11Extras Qt5SerialPort Qt5Multimedia)", "-fexceptions",
                     "-Wl,-O1 -Wl,-rpath,\\$$ORIGIN:$ORIGIN"
                 ],
                 "libraries": [
-                    "<!@(pkg-config --libs-only-l Qt5Core Qt5Network Qt5Gui Qt5Widgets Qt5WebEngineCore Qt5WebEngine Qt5WebEngineWidgets Qt5X11Extras Qt5SerialPort)", "-fexceptions"
+                    "<!@(pkg-config --libs-only-l Qt5Core Qt5Network Qt5Gui Qt5Widgets Qt5WebEngineCore Qt5WebEngine Qt5WebEngineWidgets Qt5X11Extras Qt5SerialPort Qt5Multimedia)", "-fexceptions"
                 ],
 
                 "cflags!": ["-fno-exceptions", "-Wno-comment", "-Wno-parentheses"],
@@ -59,6 +59,7 @@
         "QtWebEngineCore",
         "QtWebEngine",
         "QtWebEngineWidgets",
-        "QtSerialPort"
+        "QtSerialPort",
+        "Qt5Multimedia"
     ]
 }

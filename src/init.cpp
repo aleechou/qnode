@@ -11,7 +11,7 @@
 #include "browserwindow.h"
 #include "qxtglobalshortcut5/qxtglobalshortcut.h"
 #include "requireurlschemehandler.h"
-
+#include "mediaplayer.h"
 
 void messageOutputFilter(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -123,6 +123,7 @@ void QNodeInit(v8::Local<v8::Object> exports) {
     qputenv("QTWEBENGINE_REMOTE_DEBUGGING",QString("%1").arg(console_port).toStdString().c_str());
     exports->Set(v8str("consolePort"),v8int32(console_port)) ;
 
+    qRegisterMetaType<MediaPlayer*>();
     qRegisterMetaType<BrowserWindow*>();
     qRegisterMetaType<QxtGlobalShortcut*>();
 

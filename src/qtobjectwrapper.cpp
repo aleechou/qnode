@@ -62,6 +62,11 @@ void QtObjectWrapper::New(const FunctionCallbackInfo<Value>& args) {
 
         QtObjectWrapper* obj = new QtObjectWrapper(typeId, isolate);
 
+        if(!obj->object) {
+            Throw("cannot new a native class, maybe the constructor not declare with Q_INVOKABLE.") ;
+            return ;
+        }
+
         obj->Wrap(args.This());
         args.This()->Set(v8str("className"), args[0]) ;
         args.GetReturnValue().Set(args.This());
@@ -203,6 +208,15 @@ void QtObjectWrapper::invoke(const FunctionCallbackInfo<Value>& args) {
 void QtObjectWrapper::methodList(const FunctionCallbackInfo<Value>& args) {
 
     QtObjectWrapper* wrapper = ObjectWrap::Unwrap<QtObjectWrapper>(args.Holder());
+    if(wrapper==nullptr) {
+        Throw("object wrapper is invalid.") ;
+        return ;
+    }
+    if(wrapper->object==nullptr) {
+        Throw("not create native object.") ;
+        return ;
+    }
+
     const QMetaObject* metaObject = wrapper->object->metaObject();
 
     Isolate* isolate = args.GetIsolate();
@@ -231,7 +245,6 @@ QString QtObjectWrapper::methodList(const QMetaObject * metaObject) {
             output+= "        name: \"" +QString(parameterNames[p])+ "\",\r\n" ;
             output+= "        type: \"" +QString(parameterTypes[p])+ "\",\r\n" ;
             output+= "      },\r\n" ;
-
         }
         output+= "    ],\r\n" ;
 

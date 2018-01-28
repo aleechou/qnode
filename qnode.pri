@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT      += core gui widgets network webengine webenginewidgets network serialport gui-private
+QT      += core gui widgets network webengine webenginewidgets network multimedia serialport gui-private
 
 CONFIG += console
 
@@ -45,7 +45,16 @@ OBJECTS_DIR = $$OUTPUT_DIR/obj
 MOC_DIR = $$OUTPUT_DIR/moc
 RCC_DIR = $$OUTPUT_DIR/rcc
 
-
+contains(QT_CONFIG, pulseaudio) {
+    GYP_CONFIG += use_pulseaudio=1
+} else {
+    GYP_CONFIG += use_pulseaudio=0
+}
+contains(QT_CONFIG, alsa) {
+    GYP_CONFIG += use_alsa=1
+} else {
+    GYP_CONFIG += use_alsa=0
+}
 
 
 SOURCES += \
@@ -58,7 +67,8 @@ SOURCES += \
         $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut.cpp \
         $$PWD/src/qxtglobalshortcut5/qxtwindowsystemimp.cpp \
         $$PWD/src/qxtglobalshortcut5/qxtglobalshortcutimp.cpp \
-        $$PWD/src/requireurlschemehandler.cpp
+        $$PWD/src/requireurlschemehandler.cpp \
+    $$PWD/src/mediaplayer.cpp
 
 HEADERS += \
         $$PWD/src/browserwindow.h \
@@ -69,7 +79,8 @@ HEADERS += \
         $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_p.h \
         $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut.h \
         $$PWD/src/qxtglobalshortcut5/qxtwindowsystem.h \
-        $$PWD/src/requireurlschemehandler.h
+        $$PWD/src/requireurlschemehandler.h \
+    $$PWD/src/mediaplayer.h
 
 FORMS += \
         $$PWD/src/browserwindow.ui
