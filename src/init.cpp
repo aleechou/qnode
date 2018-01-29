@@ -11,7 +11,9 @@
 #include "browserwindow.h"
 #include "qxtglobalshortcut5/qxtglobalshortcut.h"
 #include "requireurlschemehandler.h"
-#include "mediaplayer.h"
+#include "wrapper/MediaPlayer.h"
+#include "wrapper/SerialPort.h"
+
 
 void messageOutputFilter(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -124,6 +126,7 @@ void QNodeInit(v8::Local<v8::Object> exports) {
     exports->Set(v8str("consolePort"),v8int32(console_port)) ;
 
     qRegisterMetaType<MediaPlayer*>();
+    qRegisterMetaType<SerialPort*>();
     qRegisterMetaType<BrowserWindow*>();
     qRegisterMetaType<QxtGlobalShortcut*>();
 
