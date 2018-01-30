@@ -88,7 +88,8 @@ Local<Value> qtjsonToV8(Isolate * isolate, const QJsonValue & value) {
         return v8::Undefined(isolate) ;
     }
     else {
-        return v8str("--unknow qt type--") ;
+        qDebug() << "unknow qt type:" << value.type() ;
+        return v8string( QString("--unknow qt type: %1--").arg(value.type()) ) ;
     }
 }
 
@@ -106,12 +107,18 @@ Local<Value> qvariantToV8(Isolate * isolate, const QVariant & value) {
     else if( type == QVariant::Bool ){
         return v8::Boolean::New(isolate, value.toBool()) ;
     }
+    else if(value.type()==QVariant::ByteArray) {
+        QByteArray barr = value.toByteArray() ;
+        Local<ArrayBuffer> arrb = ArrayBuffer::New(isolate, (void *)barr.data(), barr.length()) ;
+        return arrb ;
+    }
 
     // json
     else if( type == QMetaType::QJsonObject || type == QMetaType::QJsonArray || type == QMetaType::QJsonValue ){
         return qtjsonToV8(isolate, value.toJsonValue()) ;
     }
     else {
-        return v8str("--unknow qt type--") ;
+        qDebug() << "unknow qt type:" << value.type() ;
+        return v8string( QString("--unknow qt type: %1--").arg(value.type()) ) ;
     }
 }

@@ -20,8 +20,9 @@ void messageOutputFilter(QtMsgType type, const QMessageLogContext &context, cons
     // filter messages
     if( type==QtWarningMsg && (msg.indexOf("of object 'BrowserWindow' has no notify signal and is not constant")>=0
             || msg.indexOf("Remote debugging server started successfully. Try pointing a Chromium-based browser to")>=0
-    ))
+    )) {
         return ;
+    }
 
     QByteArray localMsg = msg.toLocal8Bit();
 

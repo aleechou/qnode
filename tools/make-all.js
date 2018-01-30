@@ -26,32 +26,48 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses) {
         if (!buildDir)
             buildDir = process.cwd()
 
+
         mkdir(buildDir)
 
         var signalRouterFile = buildDir + "/qtsignalrouter.cc"
 
         // 生成 qt 信号连接 c++代码
-        // if (fs.existsSync(targetQnode)) {
-        //     require("./make-qtclass-signals")(require(targetQnode), signalRouterFile, nativeClasses || [])
-        //     cflags.push("-DQT_SIGNAL_ROUTER_FILE=\"" + signalRouterFile + "\"")
-        // }
+        if (process.argv.includes('--signals')) {
+            if (fs.existsSync(targetQnode)) {
+                require("./make-qtclass-signals")(require(targetQnode), signalRouterFile, nativeClasses || [])
+                cflags.push("-DQT_SIGNAL_ROUTER_FILE=\"" + signalRouterFile + "\"")
+
+                console.log("done")
+                process.exit()
+            }
+        }
+
+        var bRebuild = process.argv.includes('--rebuild')
 
         var oricwd = process.cwd()
         process.chdir(buildDir)
 
         // qmake 
-        await exec("qmake", "CONFIG+=release", qtpro)
+        if (bRebuild) {
+            await exec("qmake", "CONFIG+=release", qtpro)
+        }
 
         // 生成 bingding.gyp
-        require("./make-binding.js")(qtpro, buildDir + "/binding.gyp", cflags)
+        if (bRebuild) {
+            require("./make-binding.js")(qtpro, buildDir + "/binding.gyp", cflags)
+        }
 
         // 编译
         console.log("build qnode by node-gyp")
-        await exec("node-gyp", "--release", "rebuild")
+        await exec("node-gyp", "--release", bRebuild ? "rebuild" : "build")
 
         // 打包
-        await require("./pack-qt.js")(targetQnode, buildDir + "/build/Release/qnode.node")
-
+        if (bRebuild) {
+            await require("./pack-qt.js")(targetQnode, buildDir + "/build/Release/qnode.node")
+        } else {
+            console.log("cp", buildDir + "/build/Release/qnode.node", "-->>", targetQnode)
+            fs.copyFileSync(buildDir + "/build/Release/qnode.node", targetQnode)
+        }
 
         process.chdir(oricwd)
 

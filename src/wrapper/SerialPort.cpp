@@ -3,7 +3,7 @@
 #include <QJsonObject>
 
 
-QJsonArray SerialPort::portsList(){
+QJsonArray SerialPort::portList(){
 
     const auto serialPortInfos = QSerialPortInfo::availablePorts();
 
