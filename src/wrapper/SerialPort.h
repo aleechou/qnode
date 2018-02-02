@@ -27,7 +27,7 @@ public:
     Q_INVOKABLE bool setBaudRate(qint32 baudRate, Directions directions = AllDirections) { return QSerialPort::setBaudRate(baudRate, directions) ;}
     Q_INVOKABLE qint32 baudRate(Directions directions = AllDirections) const { return QSerialPort::baudRate(directions) ;}
 
-    Q_INVOKABLE QByteArray read(qint64 maxlen) { return QSerialPort::read(maxlen) ;}
+    Q_INVOKABLE QByteArray read(qint32 maxlen) { return QSerialPort::read(maxlen) ;}
     Q_INVOKABLE QByteArray readAll() { return QSerialPort::readAll() ;}
     Q_INVOKABLE qint64 write(const QByteArray &data) { return QSerialPort::write(data) ;}
 
