@@ -264,7 +264,7 @@ void QtObjectWrapper::connectQtSignal(const FunctionCallbackInfo<Value>& args) {
     ConnectSignalAndSlot ;
 #endif
 
-#ifdef ConnectSignalAndSlot
+#ifndef ConnectSignalAndSlot
     qDebug() << "no macro: ConnectSignalAndSlot" ;
 #endif
 

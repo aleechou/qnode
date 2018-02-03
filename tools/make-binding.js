@@ -41,6 +41,11 @@ module.exports = function(qtpro, bindingPath, cflags) {
         }
     })
 
+    // 加入 qtsignalrouter.cc 文件
+    if(fs.existsSync(bingdingDir+"/qtsignalrouter.cc")) {
+        fileBindingGyp.targets[0].sources.push("./qtsignalrouter.cc")
+    }
+
     console.log(fileBindingGyp.targets[0].sources)
 
     if (cflags) {

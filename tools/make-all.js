@@ -30,13 +30,12 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses) {
         mkdir(buildDir)
 
         var signalRouterFile = buildDir + "/qtsignalrouter.cc"
+        cflags.push("-DQT_SIGNAL_ROUTER_FILE=\"" + signalRouterFile + "\"")
 
         // 生成 qt 信号连接 c++代码
         if (process.argv.includes('--signals')) {
             if (fs.existsSync(targetQnode)) {
                 require("./make-qtclass-signals")(require(targetQnode), signalRouterFile, nativeClasses || [])
-                cflags.push("-DQT_SIGNAL_ROUTER_FILE=\"" + signalRouterFile + "\"")
-
                 console.log("done")
                 process.exit()
             }
