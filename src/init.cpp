@@ -18,7 +18,7 @@
 void messageOutputFilter(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // filter messages
-    if( type==QtWarningMsg && (msg.indexOf("of object 'BrowserWindow' has no notify signal and is not constant")>=0
+    if( type==QtWarningMsg && (msg.indexOf("has no notify signal and is not constant, value updates in HTML will be broken!")>=0
             || msg.indexOf("Remote debugging server started successfully. Try pointing a Chromium-based browser to")>=0
     )) {
         return ;

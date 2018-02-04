@@ -43,9 +43,12 @@ signals:
     void ready(QString, bool) ;
     void scriptLoaded(const QString & url, unsigned int retData) ;
 
-private:
+protected:
+    virtual void initUi() ;
     Ui::BrowserWindow *ui;
 
+    virtual void resizeEvent(QResizeEvent *event);
+private:
     static unsigned int assignedWindowId ;
     unsigned int windowId ;
 };

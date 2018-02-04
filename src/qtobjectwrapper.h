@@ -10,8 +10,14 @@
 class QtObjectWrapper : public node::ObjectWrap {
 public:
     static void Init(v8::Handle<v8::Object> exports);
-
     static QString methodList(const QMetaObject *);
+
+//    QObject * nativeObject() {
+//        return object ;
+//    }
+//    int nativeTypeId(){
+//        return m_typeId ;
+//    }
 
 private:
     explicit QtObjectWrapper(int className, v8::Isolate* isolate);
@@ -28,7 +34,7 @@ private:
 
 
     const QMetaObject * metaObject = nullptr ;
-    QObject * object = nullptr ;
+    QObject * object ;
     v8::Isolate* isolate ;
     int m_typeId ;
 

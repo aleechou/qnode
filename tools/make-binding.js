@@ -6,7 +6,7 @@ const pt = require("path")
 
 
 
-module.exports = function(qtpro, bindingPath, cflags) {
+module.exports = function(qtpro, bindingPath, cflags, funcMakeBinding) {
 
     if (!bindingPath) {
         bindingPath = process.cwd() + "/binding.gyp"
@@ -79,6 +79,10 @@ module.exports = function(qtpro, bindingPath, cflags) {
             break
         default:
             throw new Error("unknow platform " + process.platform, )
+    }
+
+    if(funcMakeBinding) {
+        funcMakeBinding(fileBindingGyp)
     }
 
     fs.writeFileSync(bindingPath, JSON.stringify(fileBindingGyp, null, 4))

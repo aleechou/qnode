@@ -125,6 +125,10 @@ void QtObjectWrapper::invoke(const FunctionCallbackInfo<Value>& args) {
             QByteArray data((char *)buff->GetContents().Data(), buff->GetContents().ByteLength()) ;
             invokeArgs.append(QVariant(data)) ;
         }
+        else if(args[i]->IsObject() && args[i]->ToObject()->Has(v8str("typeId"))) {
+            QtObjectWrapper * argv = ObjectWrap::Unwrap<QtObjectWrapper>(args[i]->ToObject());
+            invokeArgs.append(QVariant::fromValue((void *)argv->object)) ;
+        }
         else {
             qDebug() << "unsuported args type: " << qtstring(args[i]) ;
             return ;

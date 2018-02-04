@@ -15,7 +15,7 @@ function exec(cmd, ...args) {
     })
 }
 
-module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses) {
+module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses, funcMakeBinding) {
     var cflags = []
     try {
 
@@ -47,13 +47,13 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses) {
         process.chdir(buildDir)
 
         // qmake 
-        if (bRebuild) {
+        if (bRebuild || process.argv.includes('--qmake')) {
             await exec("qmake", "CONFIG+=release", qtpro)
         }
 
         // 生成 bingding.gyp
-        if (bRebuild) {
-            require("./make-binding.js")(qtpro, buildDir + "/binding.gyp", cflags)
+        if (bRebuild || process.argv.includes('--binding')) {
+            require("./make-binding.js")(qtpro, buildDir + "/binding.gyp", cflags, funcMakeBinding)
         }
 
         // 编译

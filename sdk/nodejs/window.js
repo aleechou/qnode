@@ -24,8 +24,8 @@ function stringifyArguments(passedArgvs) {
 }
 
 class Window extends qnode.QtObjectWrapper {
-    constructor() {
-        super("BrowserWindow*")
+    constructor(className) {
+        super(className||"BrowserWindow*")
 
         Window.windowsPoolById[this.id()] = this
     }
