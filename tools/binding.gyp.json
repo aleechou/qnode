@@ -9,14 +9,15 @@
             "/Users/alee/project/qnode/lib/includes",
             "/Users/alee/project/qnode/lib/includes/QtCore"
         ],
-        "cflags": [],
+        "cflags": ["-Wno-deprecated-declarations"],
 
 
         "conditions": [
             ["OS=='linux'", {
                 "cflags": [
                     "-I<!@(qmake -query 'QT_INSTALL_PREFIX')/include/QtGui/<!@(qmake -query 'QT_VERSION')/QtGui",
-                    "<!@(pkg-config --cflags Qt5Core Qt5Network Qt5Gui Qt5Widgets Qt5WebEngineCore Qt5WebEngine Qt5WebEngineWidgets Qt5X11Extras Qt5SerialPort Qt5Multimedia)", "-Wcomment", "-Wparentheses"
+                    "<!@(pkg-config --cflags Qt5Core Qt5Network Qt5Gui Qt5Widgets Qt5WebEngineCore Qt5WebEngine Qt5WebEngineWidgets Qt5X11Extras Qt5SerialPort Qt5Multimedia)", "-Wcomment", "-Wparentheses",
+                    "-frtti"
                 ],
                 "ldflags": [
                     "<!@(pkg-config --libs-only-L --libs-only-other Qt5Core Qt5Network Qt5Gui Qt5Widgets Qt5WebEngineCore Qt5WebEngine Qt5WebEngineWidgets Qt5X11Extras Qt5SerialPort Qt5Multimedia)", "-fexceptions",
@@ -27,7 +28,7 @@
                 ],
 
                 "cflags!": ["-fno-exceptions", "-Wno-comment", "-Wno-parentheses"],
-                "cflags_cc!": ["-fno-exceptions", "-Wno-comment", "-Wno-parentheses"]
+                "cflags_cc!": ["-fno-exceptions", "-Wno-comment", "-Wno-parentheses", "-fno-rtti"]
 
             }],
             ["OS=='mac'", {

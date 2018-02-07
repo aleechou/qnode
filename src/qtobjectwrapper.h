@@ -34,9 +34,9 @@ private:
 
 
     const QMetaObject * metaObject = nullptr ;
-    QObject * object ;
-    v8::Isolate* isolate ;
-    int m_typeId ;
+    QObject * object = nullptr ;
+    v8::Isolate* isolate = nullptr ;
+    int m_typeId = -1 ;
 
     QMap<int, QObject*> signalReceivers ;
 

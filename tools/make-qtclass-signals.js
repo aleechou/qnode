@@ -133,11 +133,11 @@ ${cppIncludes}
 
     
 
-#define ConnectSignalAndSlot \\    
+#define ConnectSignalAndSlot \\
 ` + cppcode.split('\n').reduce((arr, line) => {
         arr.push(line + "    \\")
         return arr
-    }, []).join("\r\n") + "\r\n"
+    }, []).join("\r\n") + "\r\n\r\n\r\n"
 }
 
 module.exports = function(qnode, outputPath, nativeClasses) {

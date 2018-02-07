@@ -27,18 +27,18 @@ void messageOutputFilter(QtMsgType type, const QMessageLogContext &context, cons
     QByteArray localMsg = msg.toLocal8Bit();
 
     QString strMsg("");
-    switch(type)
+    switch((int)type)
     {
-    case QtDebugMsg:
+    case (int)QtDebugMsg:
         strMsg = QString("Debug:");
         break;
-    case QtWarningMsg:
+    case (int)QtWarningMsg:
         strMsg = QString("Warning:");
         break;
-    case QtCriticalMsg:
+    case (int)QtCriticalMsg:
         strMsg = QString("Critical:");
         break;
-    case QtFatalMsg:
+    case (int)QtFatalMsg:
         strMsg = QString("Fatal:");
         break;
     }
@@ -110,7 +110,7 @@ void jsApplicationFilePath(const Nan::FunctionCallbackInfo<v8::Value>& args){
 }
 
 int argc = 2 ;
-char * argv[2] = {"qnode", "--disable-web-security"} ;
+const char * argv[2] = {"qnode", "--disable-web-security"} ;
 
 void QNodeInit(v8::Local<v8::Object> exports) {
 
@@ -120,7 +120,7 @@ void QNodeInit(v8::Local<v8::Object> exports) {
     setMainIsolate(isolate) ;
 
 
-    new QApplication (argc, argv) ;
+    new QApplication (argc, (char **)argv) ;
 
     int console_port = (rand() % 50000)+10000 ;
     qputenv("QTWEBENGINE_REMOTE_DEBUGGING",QString("%1").arg(console_port).toStdString().c_str());

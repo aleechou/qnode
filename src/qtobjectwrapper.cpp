@@ -16,9 +16,11 @@ using namespace v8;
 Persistent<Function> QtObjectWrapper::constructor;
 
 QtObjectWrapper::QtObjectWrapper(int typeId, Isolate* isolate)
-    : isolate(isolate)
+    : ObjectWrap()
+    , metaObject(nullptr)
+    , object(nullptr)
+    , isolate(isolate)
     , m_typeId(typeId)
-    , ObjectWrap()
 {
     metaObject = QMetaType(m_typeId).metaObject();
     this->object = metaObject->newInstance();
@@ -69,6 +71,7 @@ void QtObjectWrapper::New(const FunctionCallbackInfo<Value>& args) {
             Throw(QString("cannot new a native class %1, maybe the constructor not declare with Q_INVOKABLE.").arg(QString(className)).toStdString().c_str()) ;
             return ;
         }
+
 
         obj->Wrap(args.This());
         args.This()->Set(v8str("className"), args[0]) ;
