@@ -80,7 +80,9 @@ function proxy(target, meta, path) {
             // 触发事件
             if (changeCallbacks[prop]) {
                 for (var id in changeCallbacks[prop]) {
-                    setImmediate(changeCallbacks[prop][id], value, prop, path, target["#"])
+                    setTimeout(() => {
+                        changeCallbacks[prop][id](value, prop, path, target["#"])
+                    }, 0)
                 }
             }
 
@@ -126,10 +128,12 @@ function proxy(target, meta, path) {
         if ("object" == typeof value) {
             if (value.__isProxy === true)
                 return value
-                    // 普通对象
+
+            // 普通对象(非数组)
             if (value.constructor != Array)
                 return proxy(value, meta, path.concat([prop]))
-                    // 数组
+
+            // 数组
             else {
                 for (var i = 0; i < value.length; i++)
                     value[i] = propValue("#index", value[i])

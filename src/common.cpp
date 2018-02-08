@@ -60,7 +60,11 @@ Local<Value> qtjsonToV8(Isolate * isolate, const QJsonValue & value) {
         return v8string(value.toString()) ;
     }
     else if(value.isDouble()) {
-        return v8int32(value.toDouble()) ;
+        double doubleValue = value.toDouble();
+        if (qAbs(doubleValue - static_cast<double>(static_cast<int>(doubleValue))) > 1e-5)
+            return v8::Number::New(isolate, doubleValue) ;
+        else
+            return v8int32(static_cast<int>(doubleValue)) ;
     }
     else if(value.isBool()) {
         return v8::Boolean::New(isolate, value.toBool()) ;
