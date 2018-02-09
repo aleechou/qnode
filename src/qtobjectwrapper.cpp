@@ -117,6 +117,9 @@ void QtObjectWrapper::invoke(const FunctionCallbackInfo<Value>& args) {
         if( args[i]->IsInt32() ) {
             invokeArgs.append(QVariant(args[i]->ToInt32()->Value())) ;
         }
+        else if( args[i]->IsNumber() ) {
+            invokeArgs.append(QVariant(args[i]->ToNumber()->Value())) ;
+        }
         else if( args[i]->IsBoolean() ){
             invokeArgs.append(QVariant(args[i]->ToBoolean()->Value())) ;
         }
@@ -133,7 +136,14 @@ void QtObjectWrapper::invoke(const FunctionCallbackInfo<Value>& args) {
             invokeArgs.append(QVariant::fromValue((void *)argv->object)) ;
         }
         else {
-            qDebug() << "unsuported args type: " << qtstring(args[i]) ;
+
+            qDebug() << "unsuported arg type, value: " << qtstring(args[i])
+                     << QString(", arg%1 %2(%3) of %4::%5()")
+                            .arg(i)
+                            .arg(metaMethod.parameterNames().at(i).toStdString().c_str())
+                            .arg(QMetaType::typeName(metaMethod.parameterType(i)))
+                            .arg(wrapper->metaObject->className())
+                            .arg(metaMethod.name().toStdString().c_str()) ;
             return ;
         }
 
