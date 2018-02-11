@@ -37,24 +37,29 @@ $window.runInNode = function(func, passedArgvs) {
 
 $window.arunInNode = function(func, passedArgvs) {
     var invoke_id = run_invoke_id++;
-    var [vars, values] = stringifyArguments(passedArgvs)
-
-    var strfunc = `
-var resolve = function(val){
-    $$qnode$$.Window.byId(${$window.id()}).run("qnode_Window_on_run_resolve(${invoke_id}, " + JSON.stringify(val) + ")")
-}
-;(function(${vars.join(',')}){
-    try{
-        (${func.toString()})()
-    }catch(e){
-        console.error(e)
-    }
-})( ${values.join(',')} )`
-
-    $window.runScriptInMainIsolate(strfunc)
 
     return new Promise((resolve) => {
+
         run_callbacks[invoke_id] = resolve
+
+        $window.nativeWindowId((windowId)=>{
+
+            var [vars, values] = stringifyArguments(passedArgvs)
+
+            var strfunc = `
+            var resolve = function(val){
+                $$qnode$$.Window.byId(${windowId}).run(()=>{qnode_Window_on_run_resolve(invoke_id,val)}, {val, invoke_id:${invoke_id}})
+            }
+            ;(function(${vars.join(',')}){
+                try{
+                    (${func.toString()})()
+                }catch(e){
+                    console.error(e)
+                }
+            })( ${values.join(',')} )`
+            
+            $window.runScriptInMainIsolate(strfunc)
+        })
     })
 }
 
@@ -69,7 +74,7 @@ window.qnode_Window_on_run_resolve = function(invokeId, val) {
     }
     run_callbacks[invokeId](val)
     delete run_callbacks[invokeId]
-    setImmediate(() => {})
+    setTimeout(() => {}, 0)
 }
 
 

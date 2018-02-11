@@ -11,31 +11,34 @@
 #include "browserwindow.h"
 #include "qxtglobalshortcut5/qxtglobalshortcut.h"
 #include "requireurlschemehandler.h"
-#include "mediaplayer.h"
+#include "wrapper/MediaPlayer.h"
+#include "wrapper/SerialPort.h"
+
 
 void messageOutputFilter(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // filter messages
-    if( type==QtWarningMsg && (msg.indexOf("of object 'BrowserWindow' has no notify signal and is not constant")>=0
+    if( type==QtWarningMsg && (msg.indexOf("has no notify signal and is not constant, value updates in HTML will be broken!")>=0
             || msg.indexOf("Remote debugging server started successfully. Try pointing a Chromium-based browser to")>=0
-    ))
+    )) {
         return ;
+    }
 
     QByteArray localMsg = msg.toLocal8Bit();
 
     QString strMsg("");
-    switch(type)
+    switch((int)type)
     {
-    case QtDebugMsg:
+    case (int)QtDebugMsg:
         strMsg = QString("Debug:");
         break;
-    case QtWarningMsg:
+    case (int)QtWarningMsg:
         strMsg = QString("Warning:");
         break;
-    case QtCriticalMsg:
+    case (int)QtCriticalMsg:
         strMsg = QString("Critical:");
         break;
-    case QtFatalMsg:
+    case (int)QtFatalMsg:
         strMsg = QString("Fatal:");
         break;
     }
@@ -107,7 +110,7 @@ void jsApplicationFilePath(const Nan::FunctionCallbackInfo<v8::Value>& args){
 }
 
 int argc = 2 ;
-char * argv[2] = {"qnode", "--disable-web-security"} ;
+const char * argv[2] = {"qnode", "--disable-web-security"} ;
 
 void QNodeInit(v8::Local<v8::Object> exports) {
 
@@ -116,14 +119,15 @@ void QNodeInit(v8::Local<v8::Object> exports) {
     v8::Isolate * isolate = exports->GetIsolate() ;
     setMainIsolate(isolate) ;
 
-
-    new QApplication (argc, argv) ;
+    new QApplication (argc, (char **)argv) ;
 
     int console_port = (rand() % 50000)+10000 ;
     qputenv("QTWEBENGINE_REMOTE_DEBUGGING",QString("%1").arg(console_port).toStdString().c_str());
+    qDebug()<< "console_port:" << console_port ;
     exports->Set(v8str("consolePort"),v8int32(console_port)) ;
 
     qRegisterMetaType<MediaPlayer*>();
+    qRegisterMetaType<SerialPort*>();
     qRegisterMetaType<BrowserWindow*>();
     qRegisterMetaType<QxtGlobalShortcut*>();
 

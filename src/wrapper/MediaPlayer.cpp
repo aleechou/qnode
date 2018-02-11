@@ -1,4 +1,4 @@
-#include "mediaplayer.h"
+#include "MediaPlayer.h"
 #include <QDebug>
 
 MediaPlayer::MediaPlayer(QObject *parent) : QMediaPlayer(parent)

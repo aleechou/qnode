@@ -2,8 +2,10 @@
 #include "common.h"
 #include <QMetaMethod>
 #include <QJsonObject>
-#include "browserwindow.h"
 #include "qxtglobalshortcut5/qxtglobalshortcut.h"
+#include "browserwindow.h"
+#include "wrapper/MediaPlayer.h"
+#include "wrapper/SerialPort.h"
 
 #ifdef QT_SIGNAL_ROUTER_FILE
 #include QT_SIGNAL_ROUTER_FILE
@@ -14,9 +16,11 @@ using namespace v8;
 Persistent<Function> QtObjectWrapper::constructor;
 
 QtObjectWrapper::QtObjectWrapper(int typeId, Isolate* isolate)
-    : isolate(isolate)
+    : ObjectWrap()
+    , metaObject(nullptr)
+    , object(nullptr)
+    , isolate(isolate)
     , m_typeId(typeId)
-    , ObjectWrap()
 {
     metaObject = QMetaType(m_typeId).metaObject();
     this->object = metaObject->newInstance();
@@ -57,15 +61,17 @@ void QtObjectWrapper::New(const FunctionCallbackInfo<Value>& args) {
         QByteArray className = qtstring(args[0]) ;
         int typeId = QMetaType::type(className);
         if(QMetaType::UnknownType==typeId) {
-            Throw("unknow qt class, you must call qRegisterMetaType first.")
+            Throw(QString("unknow qt class: %1, you must call qRegisterMetaType first.").arg(QString(className)).toStdString().c_str()) ;
+            return ;
         }
 
         QtObjectWrapper* obj = new QtObjectWrapper(typeId, isolate);
 
         if(!obj->object) {
-            Throw("cannot new a native class, maybe the constructor not declare with Q_INVOKABLE.") ;
+            Throw(QString("cannot new a native class %1, maybe the constructor not declare with Q_INVOKABLE.").arg(QString(className)).toStdString().c_str()) ;
             return ;
         }
+
 
         obj->Wrap(args.This());
         args.This()->Set(v8str("className"), args[0]) ;
@@ -80,25 +86,6 @@ void QtObjectWrapper::New(const FunctionCallbackInfo<Value>& args) {
         args.GetReturnValue().Set(cons->NewInstance(argc, argv));
     }
 }
-
-#define toQtArgs \
-    QVariantList invokeArgs ;                                               \
-    for(int i=1; i<args.Length(); i++){                                     \
-        if( args[i]->IsInt32() ) {                                          \
-            invokeArgs.append(QVariant(args[i]->ToInt32()->Value())) ;      \
-        }                                                                   \
-        else if( args[i]->IsBoolean() ){                                    \
-            invokeArgs.append(QVariant(args[i]->ToBoolean()->Value())) ;    \
-        }                                                                   \
-        else if( args[i]->IsString() ){                                     \
-            invokeArgs.append(QVariant( qtstring(args[i]) )) ;              \
-        }                                                                   \
-        else {                                                              \
-            qDebug() << "unsuported args type: " << ToQString(args[i]) ;    \
-            return ;                                                        \
-        }                                                                   \
-    }
-
 
 #define invokeargument(idx) \
             argsNum>idx? arguments.value(idx): QGenericArgument()
@@ -130,14 +117,33 @@ void QtObjectWrapper::invoke(const FunctionCallbackInfo<Value>& args) {
         if( args[i]->IsInt32() ) {
             invokeArgs.append(QVariant(args[i]->ToInt32()->Value())) ;
         }
+        else if( args[i]->IsNumber() ) {
+            invokeArgs.append(QVariant(args[i]->ToNumber()->Value())) ;
+        }
         else if( args[i]->IsBoolean() ){
             invokeArgs.append(QVariant(args[i]->ToBoolean()->Value())) ;
         }
         else if( args[i]->IsString() ){
             invokeArgs.append(QVariant( qtstring(args[i]) )) ;
         }
+        else if( args[i]->IsArrayBuffer() ){
+            Local<ArrayBuffer> buff = Local<ArrayBuffer>::Cast(args[i]) ;
+            QByteArray data((char *)buff->GetContents().Data(), buff->GetContents().ByteLength()) ;
+            invokeArgs.append(QVariant(data)) ;
+        }
+        else if(args[i]->IsObject() && args[i]->ToObject()->Has(v8str("typeId"))) {
+            QtObjectWrapper * argv = ObjectWrap::Unwrap<QtObjectWrapper>(args[i]->ToObject());
+            invokeArgs.append(QVariant::fromValue((void *)argv->object)) ;
+        }
         else {
-            qDebug() << "unsuported args type: " << qtstring(args[i]) ;
+
+            qDebug() << "unsuported arg type, value: " << qtstring(args[i])
+                     << QString(", arg%1 %2(%3) of %4::%5()")
+                            .arg(i)
+                            .arg(metaMethod.parameterNames().at(i).toStdString().c_str())
+                            .arg(QMetaType::typeName(metaMethod.parameterType(i)))
+                            .arg(wrapper->metaObject->className())
+                            .arg(metaMethod.name().toStdString().c_str()) ;
             return ;
         }
 
@@ -275,7 +281,7 @@ void QtObjectWrapper::connectQtSignal(const FunctionCallbackInfo<Value>& args) {
     ConnectSignalAndSlot ;
 #endif
 
-#ifdef ConnectSignalAndSlot
+#ifndef ConnectSignalAndSlot
     qDebug() << "no macro: ConnectSignalAndSlot" ;
 #endif
 

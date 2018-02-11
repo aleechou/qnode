@@ -38,8 +38,9 @@ function parseClassInfo(qnode, typeName) {
         var paramConv = []
         meta.params.forEach((paramMeta, i) => {
 
+            var isCppPointer = paramMeta.type.match(/\*/)
             var paramName = 'arg' + (i + 1)
-            var paramTitle = paramMeta.type.match(/\*/) ? paramMeta.type : `const ${paramMeta.type} & ${paramName}`
+            var paramTitle = isCppPointer ? paramMeta.type : `const ${paramMeta.type} & ${paramName}`
 
             cppParamList.push(paramTitle)
 
@@ -49,6 +50,8 @@ function parseClassInfo(qnode, typeName) {
                 paramConv.push(`                argv[${i+1}] = Local<Value>::New(isolate, v8::Boolean::New(isolate, ${paramName})) ;`)
             } else if (qtNumberTypes.includes(paramMeta.type)) {
                 paramConv.push(`                argv[${i+1}] = Local<Value>::New(isolate, v8int32(${paramName})) ;`)
+            } else if (['QJsonObject', 'QJsonArray', 'QJsonValue'].includes(paramMeta.type)) {
+                paramConv.push(`                argv[${i+1}] = qtjsonToV8(isolate, ${paramName}) ;`)
             } else {
                 paramConv.push(`                argv[${i+1}] = Local<Value>::New(isolate, v8str("unknow qt type (${paramMeta.type})")) ;`)
             }
@@ -110,7 +113,7 @@ function makeCpp(qnode, qtClasses) {
 
     var cppIncludes = ""
     Object.values(qtClasses).forEach((path) => {
-        cppIncludes += `#include "${path}"`
+        cppIncludes += `#include "${path}"\r\n`
     })
 
     var cppcode = parseAllClasses(qnode, qtBaseClasses.concat(Object.keys(qtClasses)))
@@ -133,11 +136,11 @@ ${cppIncludes}
 
     
 
-#define ConnectSignalAndSlot \\    
+#define ConnectSignalAndSlot \\
 ` + cppcode.split('\n').reduce((arr, line) => {
         arr.push(line + "    \\")
         return arr
-    }, []).join("\r\n") + "\r\n"
+    }, []).join("\r\n") + "\r\n\r\n\r\n"
 }
 
 module.exports = function(qnode, outputPath, nativeClasses) {

@@ -68,7 +68,8 @@ SOURCES += \
         $$PWD/src/qxtglobalshortcut5/qxtwindowsystemimp.cpp \
         $$PWD/src/qxtglobalshortcut5/qxtglobalshortcutimp.cpp \
         $$PWD/src/requireurlschemehandler.cpp \
-    $$PWD/src/mediaplayer.cpp
+        $$PWD/src/wrapper/MediaPlayer.cpp \
+        $$PWD/src/wrapper/SerialPort.cpp
 
 HEADERS += \
         $$PWD/src/browserwindow.h \
@@ -80,7 +81,8 @@ HEADERS += \
         $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut.h \
         $$PWD/src/qxtglobalshortcut5/qxtwindowsystem.h \
         $$PWD/src/requireurlschemehandler.h \
-    $$PWD/src/mediaplayer.h
+        $$PWD/src/wrapper/MediaPlayer.h \
+        $$PWD/src/wrapper/SerialPort.h
 
 FORMS += \
         $$PWD/src/browserwindow.ui

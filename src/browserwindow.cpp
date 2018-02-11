@@ -9,16 +9,16 @@
 #include <QWebChannel>
 #include <QWebEnginePage>
 #include <QWebEngineSettings>
+#include <QResizeEvent>
 
 unsigned int BrowserWindow::assignedWindowId = 0 ;
 
 
 BrowserWindow::BrowserWindow(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::BrowserWindow),
     windowId(assignedWindowId++)
 {
-    ui->setupUi(this);
+    initUi() ;
 
     resize(1024,768);
 
@@ -48,6 +48,11 @@ BrowserWindow::BrowserWindow(QWidget *parent) :
     }) ;
 }
 
+void BrowserWindow::initUi() {
+    ui = new Ui::BrowserWindow;
+    ui->setupUi(this);
+}
+
 void BrowserWindow::loadScript(const QString & url) {
     ui->browser->page()->runJavaScript(QString(
        "var script = document.createElement('script');"
@@ -62,6 +67,7 @@ void BrowserWindow::loadScript(const QString & url, unsigned int retData) {
        " script.onload=function() { if($window) $window.emitScriptLoaded('%1', %2) } ;"
        " document.body.appendChild(script)"
     ).arg(url).arg(retData)) ;
+
 }
 
 
@@ -108,4 +114,9 @@ void BrowserWindow::runScript(const QString & script) {
 
 void BrowserWindow::runScriptInMainIsolate(const QString & script) {
     runNodeScript(script);
+}
+
+void BrowserWindow::resizeEvent(QResizeEvent *event){
+    ui->browser->resize(event->size());
+    QWidget::resizeEvent(event) ;
 }

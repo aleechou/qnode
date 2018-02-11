@@ -24,8 +24,8 @@ function stringifyArguments(passedArgvs) {
 }
 
 class Window extends qnode.QtObjectWrapper {
-    constructor() {
-        super("BrowserWindow*")
+    constructor(className) {
+        super(className || "BrowserWindow*")
 
         Window.windowsPoolById[this.id()] = this
     }
@@ -103,6 +103,8 @@ class Window extends qnode.QtObjectWrapper {
         if (!funcReceiverInWindow)
             funcReceiverInWindow = () => {}
 
+        object["@"].bridgeTo.push(this)
+
         await this.arun(() => {
 
             shadowObject = qnode.bridge.object(object)
@@ -111,8 +113,6 @@ class Window extends qnode.QtObjectWrapper {
             resolve()
 
         }, { object, funcReceiverInWindow })
-
-        object["@"].bridgeTo.push(this)
     }
 }
 
