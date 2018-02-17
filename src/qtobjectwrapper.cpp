@@ -6,10 +6,7 @@
 #include "browserwindow.h"
 #include "wrapper/MediaPlayer.h"
 #include "wrapper/SerialPort.h"
-
-#ifdef QT_SIGNAL_ROUTER_FILE
-#include QT_SIGNAL_ROUTER_FILE
-#endif
+#include "qtsignalrouter.cc"
 
 using namespace v8;
 

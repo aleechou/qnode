@@ -34,7 +34,39 @@
             ["OS=='mac'", {
                 "libraries": [
                     "-Wl,-rpath,@loader_path/../Contents/Frameworks",
-                    "-F<!@(qmake -query 'QT_INSTALL_PREFIX')/lib"
+                    "-Wno-overloaded-virtual",
+                    "-Wno-deprecated-declarations",
+                    "-Wno-unused-private-field",
+                    "-Wno-unused-variable",
+                    "-F<!@(qmake -query 'QT_INSTALL_PREFIX')/lib",
+                    "-L/usr/local/opt/opencv2/lib",
+                    "-lopencv_core",
+                    "-lopencv_calib3d",
+                    "-lopencv_highgui",
+                    "-lopencv_imgproc",
+                    "-lopencv_video",
+                    "-lopencv_objdetect",
+                    "-lopencv_features2d"
+                ],
+
+                "xcode_settings": {
+                    "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
+                    "MACOSX_DEPLOYMENT_TARGET": "10.8",
+
+                    "WARNING_CFLAGS": [
+                        "-Wall",
+                        "-Wendif-labels",
+                        "-W",
+                        "-Wno-unused-parameter",
+                        "-Wno-deprecated-declarations",
+                        "-Wno-overloaded-virtual",
+                        "-Wno-unused-private-field",
+                        "-Wno-unused-variable"
+                    ]
+                },
+
+                "include_dirs": [
+                    "/usr/local/opt/opencv2/include"
                 ]
             }],
             ["OS=='win'", {

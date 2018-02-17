@@ -35,14 +35,23 @@ module.exports = function(qtpro, bindingPath, cflags, funcMakeBinding) {
 
         var mocfilename = "moc_" + pt.parse(file).base
 
+        // // 优先小写
+        // var mocfile = "output/Release/moc/" + mocfilename.toLowerCase()
+        // mocfile2 = "output/Release/moc/" + mocfilename
+        // if (fs.existsSync(mocfile)) {
+        //     fileBindingGyp.targets[0].sources.push(mocfile)
+        // } else if (fs.existsSync(mocfile2)) {
+        //     fileBindingGyp.targets[0].sources.push(mocfile2)
+        // }
+
         var mocfile = "output/Release/moc/" + mocfilename
         if (fs.existsSync(mocfile)) {
-            fileBindingGyp.targets[0].sources.push("output/Release/moc/" + mocfilename)
+            fileBindingGyp.targets[0].sources.push(mocfile)
         }
     })
 
     // 加入 qtsignalrouter.cc 文件
-    if(fs.existsSync(bingdingDir+"/qtsignalrouter.cc")) {
+    if (fs.existsSync(bingdingDir + "/qtsignalrouter.cc")) {
         fileBindingGyp.targets[0].sources.push("./qtsignalrouter.cc")
     }
 
@@ -81,7 +90,7 @@ module.exports = function(qtpro, bindingPath, cflags, funcMakeBinding) {
             throw new Error("unknow platform " + process.platform, )
     }
 
-    if(funcMakeBinding) {
+    if (funcMakeBinding) {
         funcMakeBinding(fileBindingGyp)
     }
 

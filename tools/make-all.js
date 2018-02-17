@@ -30,7 +30,7 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses, fun
         mkdir(buildDir)
 
         var signalRouterFile = buildDir + "/qtsignalrouter.cc"
-        cflags.push("-DQT_SIGNAL_ROUTER_FILE=\"" + signalRouterFile + "\"")
+            // cflags.push("-DQT_SIGNAL_ROUTER_FILE=\"" + signalRouterFile + "\"")
 
         // 生成 qt 信号连接 c++代码
         if (process.argv.includes('--signals')) {
@@ -52,8 +52,13 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses, fun
         }
 
         // 生成 bingding.gyp
-        if (bRebuild || process.argv.includes('--binding')) {
+        var bBinding = process.argv.includes('--binding')
+        if (bRebuild || bBinding) {
             require("./make-binding.js")(qtpro, buildDir + "/binding.gyp", cflags, funcMakeBinding)
+
+            if (bBinding) {
+                process.exit()
+            }
         }
 
         // 编译
