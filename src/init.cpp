@@ -123,7 +123,6 @@ void QNodeInit(v8::Local<v8::Object> exports) {
 
     int console_port = (rand() % 50000)+10000 ;
     qputenv("QTWEBENGINE_REMOTE_DEBUGGING",QString("%1").arg(console_port).toStdString().c_str());
-    qDebug()<< "console_port:" << console_port ;
     exports->Set(v8str("consolePort"),v8int32(console_port)) ;
 
     qRegisterMetaType<MediaPlayer*>();
@@ -137,7 +136,7 @@ void QNodeInit(v8::Local<v8::Object> exports) {
     uv_idle_t * uvidler = new uv_idle_t;
     uv_idle_init(uv_default_loop(), uvidler);
     uv_idle_start(uvidler, [](uv_idle_t*){
-        QCoreApplication::instance()->eventDispatcher()->processEvents(QEventLoop::EventLoopExec) ;
+        QCoreApplication::instance()->eventDispatcher()->processEvents(QEventLoop::AllEvents) ;
     }) ;
 
     // sheme "require://" for webengine page
