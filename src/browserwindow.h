@@ -37,6 +37,8 @@ public:
     Q_INVOKABLE void setEnvVarValue(const QString &,const QByteArray &) ;
     Q_INVOKABLE unsigned int nativeWindowId() { return windowId ;}
 
+    Q_INVOKABLE QObject* createQtObject(const QString & className) ;
+
     Q_INVOKABLE void emitScriptLoaded(const QString &, unsigned int) ;
 
 signals:

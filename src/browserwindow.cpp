@@ -103,6 +103,25 @@ void BrowserWindow::onLoaded() {
 }
 
 
+QObject* BrowserWindow::createQtObject(const QString & className) {
+
+    int typeId = QMetaType::type(className.toStdString().c_str());
+
+    if(QMetaType::UnknownType==typeId) {
+        qDebug() << "unknow qt class: " << className << ", you must call qRegisterMetaType first." ;
+        return nullptr ;
+    }
+
+    const QMetaObject * metaObject = QMetaType(typeId).metaObject();
+    QObject * object = metaObject->newInstance();
+    if(object==nullptr) {
+        qDebug() << "can not create qt class: " << className ;
+        return nullptr ;
+    }
+
+    return object ;
+}
+
 BrowserWindow::~BrowserWindow()
 {
     delete ui;

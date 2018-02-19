@@ -59,8 +59,20 @@ function envVarValue(name) {
 
         $window.nativeWindowId((id) => {
             $window.id = id
-
             $window.onLoaded()
         })
+
+        qt.createObject = createQtObject
     })
 })()
+
+var _assignedNativeObjId = 0
+
+function createQtObject(className) {
+    className = className.trim()
+    if (className[className.length - 1] != "*")
+        className += "*"
+    return new Promise((resolve) => {
+        $window.createQtObject(className, resolve)
+    })
+}
