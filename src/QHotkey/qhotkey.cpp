@@ -257,7 +257,6 @@ bool QHotkeyPrivate::removeShortcut(QHotkey *hotkey)
 
 void QHotkeyPrivate::activateShortcut(QHotkey::NativeShortcut shortcut)
 {
-    qDebug() << "QHotkeyPrivate::activateShortcut" ;
     QMetaMethod signal = QMetaMethod::fromSignal(&QHotkey::activated);
 	for(QHotkey *hkey : shortcuts.values(shortcut))
         signal.invoke(hkey, Qt::QueuedConnection);
