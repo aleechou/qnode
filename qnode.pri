@@ -56,6 +56,20 @@ contains(QT_CONFIG, alsa) {
     GYP_CONFIG += use_alsa=0
 }
 
+HEADERS += \
+        $$PWD/src/browserwindow.h \
+        $$PWD/src/common.h \
+        $$PWD/src/qtobjectwrapper.h \
+        $$PWD/src/init.h \
+        $$PWD/src/qxtglobalshortcut5/qxtglobal.h \
+        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_p.h \
+        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut.h \
+        $$PWD/src/qxtglobalshortcut5/qxtwindowsystem.h \
+        $$PWD/src/requireurlschemehandler.h \
+        $$PWD/src/wrapper/MediaPlayer.h \
+        $$PWD/src/wrapper/SerialPort.h \
+        $$PWD/src/QHotkey/qhotkey.h \
+        $$PWD/src/QHotkey/qhotkey_p.h
 
 SOURCES += \
         $$PWD/src/browserwindow.cpp \
@@ -69,20 +83,8 @@ SOURCES += \
         $$PWD/src/qxtglobalshortcut5/qxtglobalshortcutimp.cpp \
         $$PWD/src/requireurlschemehandler.cpp \
         $$PWD/src/wrapper/MediaPlayer.cpp \
-        $$PWD/src/wrapper/SerialPort.cpp
-
-HEADERS += \
-        $$PWD/src/browserwindow.h \
-        $$PWD/src/common.h \
-        $$PWD/src/qtobjectwrapper.h \
-        $$PWD/src/init.h \
-        $$PWD/src/qxtglobalshortcut5/qxtglobal.h \
-        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_p.h \
-        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut.h \
-        $$PWD/src/qxtglobalshortcut5/qxtwindowsystem.h \
-        $$PWD/src/requireurlschemehandler.h \
-        $$PWD/src/wrapper/MediaPlayer.h \
-        $$PWD/src/wrapper/SerialPort.h
+        $$PWD/src/wrapper/SerialPort.cpp \
+        $$PWD/src/QHotkey/qhotkey.cpp
 
 FORMS += \
         $$PWD/src/browserwindow.ui
@@ -97,17 +99,35 @@ unix:!macx {
     HEADERS += $$PWD/src/qxtglobalshortcut5/x11info.h
     SOURCES += \
             $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_x11.cpp \
-            $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_x11.cpp
+            $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_x11.cpp \
+            $$PWD/src/QHotkey/qhotkey_x11.cpp
     CONFIG+= X11
 }
 macx: {
     HEADERS  += $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_mac.h
     QMAKE_LFLAGS += -framework Carbon -framework CoreFoundation
+
+    SOURCES += \
+            $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_mac.cpp \
+            $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_mac.cpp \
+            $$PWD/src/QHotkey/qhotkey_mac.cpp
 }
 
 win32: {
+    SOURCES += \
+            $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_win.cpp \
+            $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_win.cpp \
+            $$PWD/src/QHotkey/qhotkey_win.cpp
 }
 
+
+
+mac: LIBS += -framework Carbon
+else:win32: LIBS += -luser32
+else:unix {
+        QT += x11extras
+        LIBS += -lX11
+}
 
 
 

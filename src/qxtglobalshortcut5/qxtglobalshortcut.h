@@ -40,22 +40,22 @@ class QXT_GUI_EXPORT QxtGlobalShortcut : public QObject
 {
     Q_OBJECT
     QXT_DECLARE_PRIVATE(QxtGlobalShortcut)
-    Q_PROPERTY(bool enabled READ isEnabled WRITE setEnabled)
-    Q_PROPERTY(QKeySequence shortcut READ shortcut WRITE setShortcut)
 
 public:
-    explicit QxtGlobalShortcut(QObject* parent = 0);
+    Q_INVOKABLE explicit QxtGlobalShortcut(QObject* parent = 0);
     explicit QxtGlobalShortcut(const QKeySequence& shortcut, QObject* parent = 0);
     virtual ~QxtGlobalShortcut();
 
-    QKeySequence shortcut() const;
+//    QKeySequence shortcut() const;
     bool setShortcut(const QKeySequence& shortcut);
 
-    bool isEnabled() const;
+    Q_INVOKABLE bool isEnabled() const;
+    Q_INVOKABLE QString shortcut() const;
+    Q_INVOKABLE bool setShortcut(const QString& shortcut);
 
 public Q_SLOTS:
-    void setEnabled(bool enabled = true);
-    void setDisabled(bool disabled = true);
+    void setEnabled();
+    void setDisabled();
 
 Q_SIGNALS:
     void activated();

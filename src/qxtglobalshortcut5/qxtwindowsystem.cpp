@@ -148,6 +148,6 @@ QStringList QxtWindowSystem::windowTitles()
     WindowList windows = QxtWindowSystem::windows();
     QStringList titles;
     foreach(WId window, windows)
-    titles += QxtWindowSystem::windowTitle(window);
+        titles += QxtWindowSystem::windowTitle(window);
     return titles;
 }

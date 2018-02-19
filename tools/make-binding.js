@@ -6,7 +6,7 @@ const pt = require("path")
 
 
 
-module.exports = function(qtpro, bindingPath, cflags, funcMakeBinding) {
+module.exports = function(bindingPath, cflags, funcMakeBinding) {
 
     if (!bindingPath) {
         bindingPath = process.cwd() + "/binding.gyp"
@@ -25,29 +25,10 @@ module.exports = function(qtpro, bindingPath, cflags, funcMakeBinding) {
     // 将 .pro 文件里的 source 文件写入到 binding.gyp
     var fileBindingGyp = require(__dirname + "/binding.gyp.json")
 
-    var sources = parseSourceCpp(__dirname + "/../qnode.pri", [])
-    if (qtpro)
-        sources = parseSourceCpp(qtpro, sources)
+    var sources = parseCppFilesFromMakefile(bingdingDir + "/Makefile")
 
-    sources.forEach((file, i) => {
-
+    sources.forEach((file) => {
         fileBindingGyp.targets[0].sources.push(pt.relative(bingdingDir, file))
-
-        var mocfilename = "moc_" + pt.parse(file).base
-
-        // // 优先小写
-        // var mocfile = "output/Release/moc/" + mocfilename.toLowerCase()
-        // mocfile2 = "output/Release/moc/" + mocfilename
-        // if (fs.existsSync(mocfile)) {
-        //     fileBindingGyp.targets[0].sources.push(mocfile)
-        // } else if (fs.existsSync(mocfile2)) {
-        //     fileBindingGyp.targets[0].sources.push(mocfile2)
-        // }
-
-        var mocfile = "output/Release/moc/" + mocfilename
-        if (fs.existsSync(mocfile)) {
-            fileBindingGyp.targets[0].sources.push(mocfile)
-        }
     })
 
     // 加入 qtsignalrouter.cc 文件
@@ -97,11 +78,10 @@ module.exports = function(qtpro, bindingPath, cflags, funcMakeBinding) {
     fs.writeFileSync(bindingPath, JSON.stringify(fileBindingGyp, null, 4))
 }
 
-function parseSourceCpp(qtpro, sources) {
-
-    var qtdir = pt.dirname(qtpro)
-
-    var proFileContent = fs.readFileSync(qtpro).toString()
+function parseCppFilesFromMakefile(makefilePath) {
+    var sources = []
+    var qtdir = pt.dirname(makefilePath)
+    var proFileContent = fs.readFileSync(makefilePath).toString()
 
     proFileContent = proFileContent
         .replace(/\\\r\n/g, ":")
@@ -110,7 +90,13 @@ function parseSourceCpp(qtpro, sources) {
     var res = proFileContent.match(/SOURCES\s*\+?=([^\r\n]+)/)
     if (res) {
 
-        var files = res[1].split(":")
+        var sourcesContent = res[1]
+        sourcesContent = sourcesContent
+            .replace(/\\ /g, "##space##")
+            .replace(/ +/g, ":")
+            .replace(/##space##/g, "\\ ")
+
+        var files = sourcesContent.split(":")
         files.forEach((file, i) => {
             file = file.trim()
             if (!file)
@@ -123,7 +109,6 @@ function parseSourceCpp(qtpro, sources) {
                 sources.push(srccpp)
         })
     }
-    // console.log(qtpro, sources)
 
     return sources
 }

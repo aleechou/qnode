@@ -13,6 +13,7 @@
 #include "requireurlschemehandler.h"
 #include "wrapper/MediaPlayer.h"
 #include "wrapper/SerialPort.h"
+#include "QHotkey/qhotkey.h"
 
 
 void messageOutputFilter(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -129,6 +130,7 @@ void QNodeInit(v8::Local<v8::Object> exports) {
     qRegisterMetaType<SerialPort*>();
     qRegisterMetaType<BrowserWindow*>();
     qRegisterMetaType<QxtGlobalShortcut*>();
+    qRegisterMetaType<QHotkey*>();
 
     QtObjectWrapper::Init(exports);
 
@@ -136,7 +138,8 @@ void QNodeInit(v8::Local<v8::Object> exports) {
     uv_idle_t * uvidler = new uv_idle_t;
     uv_idle_init(uv_default_loop(), uvidler);
     uv_idle_start(uvidler, [](uv_idle_t*){
-        QCoreApplication::instance()->eventDispatcher()->processEvents(QEventLoop::AllEvents) ;
+//        QCoreApplication::instance()->eventDispatcher()->processEvents(QEventLoop::AllEvents) ;
+        QApplication::processEvents();
     }) ;
 
     // sheme "require://" for webengine page

@@ -3,6 +3,7 @@
 #include <QMetaMethod>
 #include <QJsonObject>
 #include "qxtglobalshortcut5/qxtglobalshortcut.h"
+#include "QHotkey/qhotkey.h"
 #include "browserwindow.h"
 #include "wrapper/MediaPlayer.h"
 #include "wrapper/SerialPort.h"

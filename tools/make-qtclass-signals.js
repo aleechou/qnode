@@ -6,6 +6,7 @@ var qtBaseClasses = [
     'QObject*',
     'BrowserWindow*',
     'QxtGlobalShortcut*',
+    'QHotkey*'
 ]
 
 

@@ -34,10 +34,7 @@
             ["OS=='mac'", {
                 "libraries": [
                     "-Wl,-rpath,@loader_path/../Contents/Frameworks",
-                    "-Wno-overloaded-virtual",
-                    "-Wno-deprecated-declarations",
-                    "-Wno-unused-private-field",
-                    "-Wno-unused-variable",
+                    "-framework Carbon",
                     "-F<!@(qmake -query 'QT_INSTALL_PREFIX')/lib",
                     "-L/usr/local/opt/opencv2/lib",
                     "-lopencv_core",

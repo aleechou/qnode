@@ -54,7 +54,7 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses, fun
         // 生成 bingding.gyp
         var bBinding = process.argv.includes('--binding')
         if (bRebuild || bBinding) {
-            require("./make-binding.js")(qtpro, buildDir + "/binding.gyp", cflags, funcMakeBinding)
+            require("./make-binding.js")(buildDir + "/binding.gyp", cflags, funcMakeBinding)
 
             if (bBinding) {
                 process.exit()
