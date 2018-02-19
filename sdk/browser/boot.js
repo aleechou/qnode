@@ -63,6 +63,19 @@ function envVarValue(name) {
         })
 
         qt.createObject = createQtObject
+
+        qt.promisify = function(func, context) {
+            return function() {
+                return new Promise((resolve) => {
+                    arguments[arguments.length++] = resolve
+                    func.apply(context, arguments)
+                })
+            }
+        }
+
+        qt.clipboard = await qt.createObject("Clipboard")
+        qt.clipboard.text = qt.promisify(qt.clipboard.text)
+
     })
 })()
 

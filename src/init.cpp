@@ -13,6 +13,7 @@
 #include "requireurlschemehandler.h"
 #include "wrapper/MediaPlayer.h"
 #include "wrapper/SerialPort.h"
+#include "wrapper/clipboard.h"
 #include "QHotkey/qhotkey.h"
 
 
@@ -131,6 +132,7 @@ void QNodeInit(v8::Local<v8::Object> exports) {
     qRegisterMetaType<BrowserWindow*>();
     qRegisterMetaType<QxtGlobalShortcut*>();
     qRegisterMetaType<QHotkey*>();
+    qRegisterMetaType<Clipboard*>();
 
     QtObjectWrapper::Init(exports);
 

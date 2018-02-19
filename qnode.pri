@@ -69,7 +69,8 @@ HEADERS += \
         $$PWD/src/wrapper/MediaPlayer.h \
         $$PWD/src/wrapper/SerialPort.h \
         $$PWD/src/QHotkey/qhotkey.h \
-        $$PWD/src/QHotkey/qhotkey_p.h
+        $$PWD/src/QHotkey/qhotkey_p.h \
+    $$PWD/src/wrapper/clipboard.h
 
 SOURCES += \
         $$PWD/src/browserwindow.cpp \
@@ -84,7 +85,8 @@ SOURCES += \
         $$PWD/src/requireurlschemehandler.cpp \
         $$PWD/src/wrapper/MediaPlayer.cpp \
         $$PWD/src/wrapper/SerialPort.cpp \
-        $$PWD/src/QHotkey/qhotkey.cpp
+        $$PWD/src/QHotkey/qhotkey.cpp \
+    $$PWD/src/wrapper/clipboard.cpp
 
 FORMS += \
         $$PWD/src/browserwindow.ui
