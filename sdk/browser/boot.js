@@ -1,14 +1,3 @@
-// runJavaScript(readFile(":/sdk/webkit/require.js"));
-
-// new QWebChannel(qt.webChannelTransport, function(channel) {
-//     window.$window = channel.$window
-
-
-// })
-
-
-
-
 function loadScript(url) {
     return new Promise((resolve) => {
         var script = document.createElement('script');
@@ -25,7 +14,7 @@ async function loadScriptList(lst) {
     }
 }
 
-function envVarValue(name) {
+function envVarValue() {
     return new Promise((resolve) => {
         $window.envVarValue("QNODE_SDKPATH", resolve)
     })
@@ -76,16 +65,28 @@ function envVarValue(name) {
         qt.clipboard = await qt.createObject("Clipboard")
         qt.clipboard.text = qt.promisify(qt.clipboard.text)
 
+        qt._loadedlisteners.forEach((cb) => {
+            try {
+                cb()
+            } catch (e) {
+                console.error(e)
+            }
+        })
     })
 })()
-
-var _assignedNativeObjId = 0
 
 function createQtObject(className) {
     className = className.trim()
     if (className[className.length - 1] != "*")
         className += "*"
     return new Promise((resolve) => {
-        $window.createQtObject(className, resolve)
+        $window.createQtObject(className, (object) => {
+
+            object.on = function(signal, func) {
+                this[signal].connect(func)
+            }
+
+            resolve(object)
+        })
     })
 }

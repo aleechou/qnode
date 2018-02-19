@@ -22,11 +22,6 @@ class QHOTKEY_SHARED_EXPORT QHotkey : public QObject
 	Q_OBJECT
 	friend class QHotkeyPrivate;
 
-	//! Specifies whether this hotkey is currently registered or not
-	Q_PROPERTY(bool registered READ isRegistered WRITE setRegistered NOTIFY registeredChanged)
-	//! Holds the shortcut this hotkey will be triggered on
-    Q_PROPERTY(QKeySequence shortcut READ shortcut WRITE setKeySequenceShortcut RESET resetShortcut)
-
 public:
 	//! Defines shortcut with native keycodes
 	class QHOTKEY_SHARED_EXPORT NativeShortcut {

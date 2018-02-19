@@ -77,7 +77,10 @@ bool QHotkey::isRegistered() const
 }
 
 bool QHotkey::setShortcut(const QString &shortcut){
-    return setKeySequenceShortcut(QKeySequence::fromString(shortcut), false) ;
+    QKeySequence ks = QKeySequence::fromString(shortcut) ;
+    if(ks.toString().isEmpty())
+        return false ;
+    return setKeySequenceShortcut(ks, false) ;
 }
 
 bool QHotkey::setKeySequenceShortcut(const QKeySequence &shortcut, bool autoRegister)

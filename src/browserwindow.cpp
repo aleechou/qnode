@@ -35,6 +35,12 @@ BrowserWindow::BrowserWindow(QWidget *parent) :
     ui->browser->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
     ui->browser->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
 
+
+    QObject::connect(ui->browser->page(), &QWebEnginePage::loadStarted,[this](){
+        QWebEnginePage * page = ui->browser->page() ;
+        page->runJavaScript(readFile(envVarValue("QNODE_SDKPATH")+"/browser/boot0.js")) ;
+    }) ;
+
     QObject::connect(ui->browser->page(), &QWebEnginePage::loadFinished,[this](bool ok){
 
         QWebEnginePage * page = ui->browser->page() ;
