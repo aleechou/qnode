@@ -5,7 +5,6 @@ const fs = require("fs")
 var qtBaseClasses = [
     'QObject*',
     'BrowserWindow*',
-    'QxtGlobalShortcut*',
     'QHotkey*'
 ]
 
@@ -19,8 +18,13 @@ function parseClassInfo(qnode, typeName) {
         qnode = require("../")
     }
 
-    var typeid = eval(qnode.qtTypeId(typeName))
-    var methods = eval(qnode.qtClassMeta(typeName))
+    try {
+        var typeid = eval(qnode.qtTypeId(typeName))
+        var methods = eval(qnode.qtClassMeta(typeName))
+    } catch (e) {
+        console.error(e)
+        return
+    }
 
     var className = typeName.replace(/\*/g, '').trim()
 
@@ -77,7 +81,7 @@ ${paramConv.join("\\\r\n")}
 
     cppcode += `
         default:
-            Throw( QString("unknow sigindex: %1, for qt native class: QxtGlobalShortcut (typeId: %2)").arg(sigindex).arg(wrapper->m_typeId).toStdString().c_str() )
+            Throw( QString("unknow sigindex: %1, for qt native class: ${className} (typeId: %2)").arg(sigindex).arg(wrapper->m_typeId).toStdString().c_str() )
             return ;
         }
 
@@ -89,6 +93,8 @@ ${paramConv.join("\\\r\n")}
 }
 
 function parseAllClasses(qnode, qtClasses) {
+
+    console.log(qtClasses)
 
     var cppcode = `
 switch (wrapper->m_typeId) {

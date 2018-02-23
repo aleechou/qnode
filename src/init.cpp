@@ -130,7 +130,7 @@ void QNodeInit(v8::Local<v8::Object> exports) {
     qRegisterMetaType<MediaPlayer*>();
     qRegisterMetaType<SerialPort*>();
     qRegisterMetaType<BrowserWindow*>();
-    qRegisterMetaType<QxtGlobalShortcut*>();
+//    qRegisterMetaType<QxtGlobalShortcut*>();
     qRegisterMetaType<QHotkey*>();
     qRegisterMetaType<Clipboard*>();
 

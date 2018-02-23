@@ -13,6 +13,10 @@ module.exports = function(bindingPath, cflags, funcMakeBinding) {
     }
     var bingdingDir = pt.dirname(bindingPath)
 
+    if (!cflags) {
+        cflags = []
+    }
+
     // 生成 uic
     child_process.execFileSync("make", ["compiler_uic_make_all"])
 
@@ -33,14 +37,14 @@ module.exports = function(bindingPath, cflags, funcMakeBinding) {
 
     // 加入 qtsignalrouter.cc 文件
     if (fs.existsSync(bingdingDir + "/qtsignalrouter.cc")) {
+
+        cflags.push("-DQtSignalRouter")
         fileBindingGyp.targets[0].sources.push("./qtsignalrouter.cc")
     }
 
     console.log(fileBindingGyp.targets[0].sources)
 
-    if (cflags) {
-        fileBindingGyp.targets[0].cflags = (fileBindingGyp.targets[0].cflags || []).concat(cflags)
-    }
+    fileBindingGyp.targets[0].cflags = (fileBindingGyp.targets[0].cflags || []).concat(cflags)
 
     // qt libs
     switch (process.platform) {
