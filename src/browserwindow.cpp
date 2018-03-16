@@ -128,6 +128,18 @@ QObject* BrowserWindow::createQtObject(const QString & className) {
     return object ;
 }
 
+
+void BrowserWindow::nativeBridgeQtObject(QObject * object, const QString & receivedFuncCode) {
+    m_bridgingQtObject = object ;
+    if(!m_bridgingQtObject) {
+        qDebug() << "BrowserWindow::bridgeQtObject() received a NULL object" ;
+        return ;
+    }
+    ui->browser->page()->runJavaScript(QString(
+       "$window._bridgingQtObject(%1) ;"
+    ).arg(receivedFuncCode)) ;
+}
+
 BrowserWindow::~BrowserWindow()
 {
     delete ui;

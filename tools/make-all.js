@@ -9,7 +9,7 @@ const qtSignalsRouterMaker = require("./make-qtclass-signals")
 function exec(cmd, ...args) {
     return new Promise((resolve) => {
         var chdproc = child_process.execFile(cmd, args);
-        chdproc.on('exit', resolve)
+        chdproc.on('close', resolve)
         chdproc.on('error', console.error)
         chdproc.stderr.pipe(process.stderr)
         chdproc.stdout.pipe(process.stdout)
@@ -58,6 +58,7 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses, fun
 
         if (!buildDir)
             buildDir = process.cwd()
+        var buildQnode = buildDir + "/build/Release/qnode.node"
 
         if (!fs.existsSync(buildDir)) {
             bRebuild = true
@@ -73,6 +74,9 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses, fun
             if (fs.existsSync(targetQnode)) {
                 qtSignalsRouterMaker(require(targetQnode), signalRouterFile, nativeClasses || [])
                 process.exit()
+            } else {
+                console.log("can not find, ", targetQnode, "not make qtsignalrouter.cc")
+                process.exit(1)
             }
         }
 
@@ -111,22 +115,28 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses, fun
 
         // 打包
         if (bRebuild) {
-            await require("./pack-qt.js")(targetQnode, buildDir + "/build/Release/qnode.node")
+            await require("./pack-qt.js")(targetQnode, buildQnode)
         } else {
-            console.log("cp", buildDir + "/build/Release/qnode.node", "-->>", targetQnode)
-            fs.copyFileSync(buildDir + "/build/Release/qnode.node", targetQnode)
+            console.log("cp", buildQnode, "-->>", targetQnode)
+            fs.copyFileSync(buildQnode, targetQnode)
         }
 
         // 无 qtsignalrouter.cc 文件编译
         // 则在编译后生成 qtsignalrouter.cc 文件, 并再次编译
         // (qtsignalrouter.cc 需要在运行时反射生成)
         if (remakeQtSignalRouter) {
-            console.log("make qtsignalrouter.cc")
-            await exec(process.argv[0], __filename, "--signals", "--nativeClasses", JSON.stringify(nativeClasses), "--target", targetQnode)
+            console.log(">>>> make qtsignalrouter.cc", targetQnode)
+            if (0 != await exec(process.argv[0], __filename, "--signals", "--nativeClasses", JSON.stringify(nativeClasses), "--target", targetQnode)) {
+                process.exit()
+            }
 
             console.log("build qnode again")
             await exec("node-gyp", "--release", "build")
+
+            console.log("cp", buildQnode, "-->>", targetQnode)
+            fs.copyFileSync(buildQnode, targetQnode)
         }
+
 
         process.chdir(oricwd)
 

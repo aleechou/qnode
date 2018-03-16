@@ -1,6 +1,8 @@
 #ifndef QTOBJECTWRAPPER_H
 #define QTOBJECTWRAPPER_H
 
+#include <QVariant>
+#include <QJsonValue>
 #include <QObject>
 #include <QMap>
 #include <node.h>
@@ -12,12 +14,8 @@ public:
     static void Init(v8::Handle<v8::Object> exports);
     static QString methodList(const QMetaObject *);
 
-//    QObject * nativeObject() {
-//        return object ;
-//    }
-//    int nativeTypeId(){
-//        return m_typeId ;
-//    }
+    QObject * qtObject() ;
+    int qtTypeId();
 
 private:
     explicit QtObjectWrapper(int className, v8::Isolate* isolate);
@@ -32,6 +30,10 @@ private:
     static void connectQtSignal(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void disconnectQtSignal(const v8::FunctionCallbackInfo<v8::Value>& args);
 
+
+    static QJsonArray v8arrayToQt(v8::Isolate * isolate, const v8::Local<v8::Array> & value) ;
+    static QVariant v8ToQt(v8::Isolate * isolate, const v8::Local<v8::Value> & value) ;
+    static QJsonValue v8ToQJson(v8::Isolate * isolate, const v8::Local<v8::Value> & value) ;
 
     const QMetaObject * metaObject = nullptr ;
     QObject * object = nullptr ;

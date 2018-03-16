@@ -33,6 +33,13 @@ QtObjectWrapper::~QtObjectWrapper() {
     }
 }
 
+QObject * QtObjectWrapper::qtObject(){
+    return object ;
+}
+int QtObjectWrapper::qtTypeId(){
+    return m_typeId ;
+}
+
 void QtObjectWrapper::Init(Handle<Object> exports) {
     Isolate* isolate = Isolate::GetCurrent();
 
@@ -88,6 +95,74 @@ void QtObjectWrapper::New(const FunctionCallbackInfo<Value>& args) {
     }
 }
 
+#include <QVariantList>
+
+QJsonArray QtObjectWrapper::v8arrayToQt(Isolate * isolate, const Local<Array> & value) {
+    QJsonArray array ;
+    for(uint i=0; i<value->Length(); i++){
+        array.append(v8ToQJson(isolate, value->Get(i))) ;
+    }
+    return array ;
+}
+
+
+QJsonValue QtObjectWrapper::v8ToQJson(Isolate * isolate, const Local<Value> & value){
+
+    if( value->IsInt32() ) {
+        return QJsonValue(value->ToInt32()->Value()) ;
+    }
+    else if( value->IsNumber() ) {
+        return QJsonValue(value->ToNumber()->Value()) ;
+    }
+    else if( value->IsBoolean() ){
+        return QJsonValue(value->ToBoolean()->Value()) ;
+    }
+    else if( value->IsString() ){
+        return QJsonValue( qtstring(value) ) ;
+    }
+    else if( value->IsArray() ){
+        Local<Array> arr = Local<Array>::Cast(value);
+        return v8arrayToQt(isolate,arr) ;
+    }
+    else {
+        return QJsonValue() ;
+    }
+}
+
+QVariant QtObjectWrapper::v8ToQt(Isolate * isolate, const Local<Value> & value){
+
+    if( value->IsInt32() ) {
+        return QVariant(value->ToInt32()->Value()) ;
+    }
+    else if( value->IsNumber() ) {
+        return QVariant(value->ToNumber()->Value()) ;
+    }
+    else if( value->IsBoolean() ){
+        return QVariant(value->ToBoolean()->Value()) ;
+    }
+    else if( value->IsString() ){
+        return QVariant( qtstring(value) ) ;
+    }
+    else if( value->IsArrayBuffer() ){
+        Local<ArrayBuffer> buff = Local<ArrayBuffer>::Cast(value) ;
+        QByteArray data((char *)buff->GetContents().Data(), buff->GetContents().ByteLength()) ;
+        return QVariant(data) ;
+    }
+    else if( value->IsArray() ){
+        Local<Array> arr = Local<Array>::Cast(value);
+        return v8arrayToQt(isolate,arr) ;
+//            QByteArray data((char *)arr->GetContents().Data()
+    }
+    else if(value->IsObject() && value->ToObject()->Has(v8str("typeId"))) {
+        QtObjectWrapper * argv = ObjectWrap::Unwrap<QtObjectWrapper>(value->ToObject());
+        return QVariant::fromValue((void *)argv->object) ;
+    }
+    else {
+        return QVariant() ;
+    }
+}
+
+
 #define invokeargument(idx) \
             argsNum>idx? arguments.value(idx): QGenericArgument()
 
@@ -115,29 +190,10 @@ void QtObjectWrapper::invoke(const FunctionCallbackInfo<Value>& args) {
     QList<QGenericArgument> arguments;
     QVariantList invokeArgs ;
     for(int i=1; i<args.Length(); i++){
-        if( args[i]->IsInt32() ) {
-            invokeArgs.append(QVariant(args[i]->ToInt32()->Value())) ;
-        }
-        else if( args[i]->IsNumber() ) {
-            invokeArgs.append(QVariant(args[i]->ToNumber()->Value())) ;
-        }
-        else if( args[i]->IsBoolean() ){
-            invokeArgs.append(QVariant(args[i]->ToBoolean()->Value())) ;
-        }
-        else if( args[i]->IsString() ){
-            invokeArgs.append(QVariant( qtstring(args[i]) )) ;
-        }
-        else if( args[i]->IsArrayBuffer() ){
-            Local<ArrayBuffer> buff = Local<ArrayBuffer>::Cast(args[i]) ;
-            QByteArray data((char *)buff->GetContents().Data(), buff->GetContents().ByteLength()) ;
-            invokeArgs.append(QVariant(data)) ;
-        }
-        else if(args[i]->IsObject() && args[i]->ToObject()->Has(v8str("typeId"))) {
-            QtObjectWrapper * argv = ObjectWrap::Unwrap<QtObjectWrapper>(args[i]->ToObject());
-            invokeArgs.append(QVariant::fromValue((void *)argv->object)) ;
-        }
-        else {
 
+        QVariant var = v8ToQt(isolate, args[i]) ;
+
+        if(var.type()==QVariant::Invalid) {
             qDebug() << "unsuported arg type, value: " << qtstring(args[i])
                      << QString(", arg%1 %2(%3) of %4::%5()")
                             .arg(i)
@@ -147,6 +203,8 @@ void QtObjectWrapper::invoke(const FunctionCallbackInfo<Value>& args) {
                             .arg(metaMethod.name().toStdString().c_str()) ;
             return ;
         }
+
+        invokeArgs.append(var) ;
 
         arguments << QGenericArgument (
             QMetaType::typeName(invokeArgs.at(i-1).userType()),

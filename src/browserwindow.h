@@ -7,6 +7,7 @@
 #include <QJsonArray>
 #include <QVariant>
 #include <QDebug>
+#include "qtobjectwrapper.h"
 
 namespace Ui {
 class BrowserWindow;
@@ -38,6 +39,8 @@ public:
     Q_INVOKABLE unsigned int nativeWindowId() { return windowId ;}
 
     Q_INVOKABLE QObject* createQtObject(const QString & className) ;
+    Q_INVOKABLE void nativeBridgeQtObject(QObject * object, const QString & receivedFuncCode) ;
+    Q_INVOKABLE QObject* _bridgingQtObject(){ return m_bridgingQtObject ;}
 
     Q_INVOKABLE void emitScriptLoaded(const QString &, unsigned int) ;
 
@@ -53,6 +56,7 @@ protected:
 private:
     static unsigned int assignedWindowId ;
     unsigned int windowId ;
+    QObject * m_bridgingQtObject = nullptr ;
 };
 
 

@@ -99,6 +99,8 @@ class Window extends qnode.QtObjectWrapper {
         })
     }
 
+
+
     async bridgeObject(object, funcReceiverInWindow) {
         if (!funcReceiverInWindow)
             funcReceiverInWindow = () => {}
@@ -113,6 +115,14 @@ class Window extends qnode.QtObjectWrapper {
             resolve()
 
         }, { object, funcReceiverInWindow })
+    }
+
+    bridgeQtObject(object, func) {
+        if (!object instanceof qnode.QtObjectWrapper) {
+            console.error("qnode.Window.bridgeQtObject()'s arg object must be a object what instance of qnode.QtObjectWrapper ")
+            return
+        }
+        return this.nativeBridgeQtObject(object, func ? func.toString() : "")
     }
 }
 
