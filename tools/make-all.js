@@ -3,29 +3,66 @@
 const fs = require("fs")
 const child_process = require("child_process")
 const pt = require("path")
+const qtSignalsRouterMaker = require("./make-qtclass-signals")
 
 
 function exec(cmd, ...args) {
     return new Promise((resolve) => {
         var chdproc = child_process.execFile(cmd, args);
-        chdproc.on('exit', resolve)
+        chdproc.on('close', resolve)
         chdproc.on('error', console.error)
         chdproc.stderr.pipe(process.stderr)
         chdproc.stdout.pipe(process.stdout)
     })
 }
 
+function getCmdlineArgv(name) {
+    var nameIndex = process.argv.findIndex(arg => arg == name)
+    if (nameIndex > 0) {
+        return process.argv[nameIndex + 1]
+    }
+}
+
 module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses, funcMakeBinding) {
+
+    var bRebuild = process.argv.includes('--rebuild')
+
+    if (!nativeClasses) {
+        nativeClasses = {}
+    }
+
+    // 来自命令行的 nativeClasses
+    var argNativeClassesValue = getCmdlineArgv("--nativeClasses")
+    if (argNativeClassesValue != undefined) {
+        try {
+            argNativeClassesValue = JSON.parse(argNativeClassesValue)
+        } catch (e) {
+            console.error(e)
+        }
+        if (argNativeClassesValue) {
+            nativeClasses = Object.assign(nativeClasses, argNativeClassesValue)
+        }
+    }
+
     var cflags = []
     try {
 
         if (!qtpro)
             qtpro = __dirname + "/../qnode.pro"
+        var argvTarget = getCmdlineArgv("--target")
+        if (argvTarget) {
+            targetQnode = argvTarget
+        }
         if (!targetQnode)
             targetQnode = __dirname + "/../.bin/qnode.node"
+
         if (!buildDir)
             buildDir = process.cwd()
+        var buildQnode = buildDir + "/build/Release/qnode.node"
 
+        if (!fs.existsSync(buildDir)) {
+            bRebuild = true
+        }
 
         mkdir(buildDir)
 
@@ -35,13 +72,22 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses, fun
         // 生成 qt 信号连接 c++代码
         if (process.argv.includes('--signals')) {
             if (fs.existsSync(targetQnode)) {
-                require("./make-qtclass-signals")(require(targetQnode), signalRouterFile, nativeClasses || [])
-                console.log("done")
+                qtSignalsRouterMaker(require(targetQnode), signalRouterFile, nativeClasses || [])
                 process.exit()
+            } else {
+                console.log("can not find, ", targetQnode, "not make qtsignalrouter.cc")
+                process.exit(1)
             }
         }
 
-        var bRebuild = process.argv.includes('--rebuild')
+        // 清空 qtsignalrouter.cc 文件
+        if (bRebuild && fs.existsSync(signalRouterFile)) {
+            fs.unlinkSync(signalRouterFile)
+        }
+        if (!fs.existsSync(signalRouterFile)) {
+            fs.writeFileSync(signalRouterFile, "")
+            var remakeQtSignalRouter = true
+        }
 
         var oricwd = process.cwd()
         process.chdir(buildDir)
@@ -62,18 +108,38 @@ module.exports = async function(qtpro, targetQnode, buildDir, nativeClasses, fun
         }
 
         // 编译
-        console.log("build qnode by node-gyp")
-        await exec("node-gyp", "--release", bRebuild ? "rebuild" : "build")
+        if (!process.argv.includes('--noMake')) {
+            console.log("build qnode by node-gyp")
+            await exec("node-gyp", "--release", bRebuild ? "rebuild" : "build")
+        }
 
         // 打包
         if (bRebuild) {
-            await require("./pack-qt.js")(targetQnode, buildDir + "/build/Release/qnode.node")
+            await require("./pack-qt.js")(targetQnode, buildQnode)
         } else {
-            console.log("cp", buildDir + "/build/Release/qnode.node", "-->>", targetQnode)
-            fs.copyFileSync(buildDir + "/build/Release/qnode.node", targetQnode)
+            console.log("cp", buildQnode, "-->>", targetQnode)
+            fs.copyFileSync(buildQnode, targetQnode)
         }
 
+        // 无 qtsignalrouter.cc 文件编译
+        // 则在编译后生成 qtsignalrouter.cc 文件, 并再次编译
+        // (qtsignalrouter.cc 需要在运行时反射生成)
+        if (remakeQtSignalRouter) {
+            console.log(">>>> make qtsignalrouter.cc", targetQnode)
+            if (0 != await exec(process.argv[0], __filename, "--signals", "--nativeClasses", JSON.stringify(nativeClasses), "--target", targetQnode)) {
+                process.exit()
+            }
+
+            console.log("build qnode again")
+            await exec("node-gyp", "--release", "build")
+
+            console.log("cp", buildQnode, "-->>", targetQnode)
+            fs.copyFileSync(buildQnode, targetQnode)
+        }
+
+
         process.chdir(oricwd)
+
 
     } catch (e) {
         console.error(e)

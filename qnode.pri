@@ -61,10 +61,10 @@ HEADERS += \
         $$PWD/src/common.h \
         $$PWD/src/qtobjectwrapper.h \
         $$PWD/src/init.h \
-        $$PWD/src/qxtglobalshortcut5/qxtglobal.h \
-        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_p.h \
-        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut.h \
-        $$PWD/src/qxtglobalshortcut5/qxtwindowsystem.h \
+#        $$PWD/src/qxtglobalshortcut5/qxtglobal.h \
+#        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_p.h \
+#        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut.h \
+#        $$PWD/src/qxtglobalshortcut5/qxtwindowsystem.h \
         $$PWD/src/requireurlschemehandler.h \
         $$PWD/src/wrapper/MediaPlayer.h \
         $$PWD/src/wrapper/SerialPort.h \
@@ -77,48 +77,48 @@ SOURCES += \
         $$PWD/src/common.cpp \
         $$PWD/src/qtobjectwrapper.cpp \
         $$PWD/src/init.cpp \
-        $$PWD/src/qxtglobalshortcut5/qxtglobal.cpp \
-        $$PWD/src/qxtglobalshortcut5/qxtwindowsystem.cpp \
-        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut.cpp \
-        $$PWD/src/qxtglobalshortcut5/qxtwindowsystemimp.cpp \
-        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcutimp.cpp \
+#        $$PWD/src/qxtglobalshortcut5/qxtglobal.cpp \
+#        $$PWD/src/qxtglobalshortcut5/qxtwindowsystem.cpp \
+#        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut.cpp \
+#        $$PWD/src/qxtglobalshortcut5/qxtwindowsystemimp.cpp \
+#        $$PWD/src/qxtglobalshortcut5/qxtglobalshortcutimp.cpp \
         $$PWD/src/requireurlschemehandler.cpp \
         $$PWD/src/wrapper/MediaPlayer.cpp \
         $$PWD/src/wrapper/SerialPort.cpp \
         $$PWD/src/QHotkey/qhotkey.cpp \
-    $$PWD/src/wrapper/clipboard.cpp
+        $$PWD/src/wrapper/clipboard.cpp
 
 FORMS += \
         $$PWD/src/browserwindow.ui
 
 
 # for QxtGlobalShortcut
-unix:!macx:{ QT += x11extras }
-DEFINES += BUILD_QXT_CORE \
-    BUILD_QXT_GUI
+#unix:!macx:{ QT += x11extras }
+#DEFINES += BUILD_QXT_CORE \
+#    BUILD_QXT_GUI
 
 unix:!macx {
-    HEADERS += $$PWD/src/qxtglobalshortcut5/x11info.h
+#    HEADERS += $$PWD/src/qxtglobalshortcut5/x11info.h
     SOURCES += \
-            $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_x11.cpp \
-            $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_x11.cpp \
+#            $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_x11.cpp \
+#            $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_x11.cpp \
             $$PWD/src/QHotkey/qhotkey_x11.cpp
-    CONFIG+= X11
+#    CONFIG+= X11
 }
 macx: {
-    HEADERS  += $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_mac.h
+#    HEADERS  += $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_mac.h
     QMAKE_LFLAGS += -framework Carbon -framework CoreFoundation
 
     SOURCES += \
-            $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_mac.cpp \
-            $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_mac.cpp \
+#            $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_mac.cpp \
+#            $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_mac.cpp \
             $$PWD/src/QHotkey/qhotkey_mac.cpp
 }
 
 win32: {
     SOURCES += \
-            $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_win.cpp \
-            $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_win.cpp \
+#            $$PWD/src/qxtglobalshortcut5/qxtwindowsystem_win.cpp \
+#            $$PWD/src/qxtglobalshortcut5/qxtglobalshortcut_win.cpp \
             $$PWD/src/QHotkey/qhotkey_win.cpp
 }
 
