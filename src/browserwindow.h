@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QJsonValue>
 #include <QJsonArray>
+#include <QJsonObject>
 #include <QVariant>
 #include <QDebug>
 
@@ -22,9 +23,16 @@ public:
     Q_INVOKABLE BrowserWindow(QWidget *parent = 0);
     ~BrowserWindow();
 
+    Q_INVOKABLE void move(int x, int y) ;
+    Q_INVOKABLE int width() const ;
+    Q_INVOKABLE int height() const ;
     Q_INVOKABLE void resize(int w, int h){
         return QWidget::resize(w,h);
     }
+    Q_INVOKABLE void setWindowFlags(uint type);
+    Q_INVOKABLE uint windowFlags();
+
+    Q_INVOKABLE QJsonObject desktop() ;
 
     Q_INVOKABLE void load(const QString &) ;
     Q_INVOKABLE void onLoaded() ;

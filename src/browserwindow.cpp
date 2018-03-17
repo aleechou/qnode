@@ -10,6 +10,7 @@
 #include <QWebEnginePage>
 #include <QWebEngineSettings>
 #include <QResizeEvent>
+#include <QDesktopWidget>
 
 unsigned int BrowserWindow::assignedWindowId = 0 ;
 
@@ -34,7 +35,6 @@ BrowserWindow::BrowserWindow(QWidget *parent) :
     ui->browser->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessFileUrls, true);
     ui->browser->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
     ui->browser->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
-
 
     QObject::connect(ui->browser->page(), &QWebEnginePage::loadStarted,[this](){
         QWebEnginePage * page = ui->browser->page() ;
@@ -92,6 +92,32 @@ QByteArray BrowserWindow::readFile(const QString & filepath) {
     return content ;
 }
 
+void BrowserWindow::move(int x, int y) {
+    return QWidget::move(x,y) ;
+}
+int BrowserWindow::width() const {
+    return size().width() ;
+}
+int BrowserWindow::height() const {
+    return size().height() ;
+}
+
+
+QJsonObject BrowserWindow::desktop() {
+    QJsonObject info ;
+    QJsonArray position ;
+
+    QDesktopWidget * desktop = QApplication::desktop() ;
+    QRect rect = desktop->availableGeometry() ;
+
+    position.append(rect.left());
+    position.append(rect.top());
+    info.insert("position", position) ;
+    info.insert("width", rect.width()) ;
+    info.insert("height", rect.height()) ;
+
+    return info ;
+}
 
 QByteArray BrowserWindow::envVarValue(const QString & name) {
     return qgetenv(name.toStdString().c_str()) ;
@@ -144,4 +170,11 @@ void BrowserWindow::runScriptInMainIsolate(const QString & script) {
 void BrowserWindow::resizeEvent(QResizeEvent *event){
     ui->browser->resize(event->size());
     QWidget::resizeEvent(event) ;
+}
+
+void BrowserWindow::setWindowFlags(uint type){
+    QWidget::setWindowFlags((Qt::WindowFlags) type) ;
+}
+uint BrowserWindow::windowFlags(){
+    return (uint) QWidget::windowFlags() ;
 }
